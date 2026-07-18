@@ -1,0 +1,1819 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#100f0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="审美复利">
+  <link rel="icon" href="data:,">
+  <title>审美复利 · 双链版</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #100f0d;
+      --panel: #1a1815;
+      --panel-2: #211e1a;
+      --line: #39342d;
+      --line-light: #514a40;
+      --text: #f4eee3;
+      --muted: #9e968a;
+      --traffic: #ff6b2c;
+      --traffic-soft: rgba(255, 107, 44, .11);
+      --style: #8ba9ff;
+      --style-soft: rgba(139, 169, 255, .11);
+      --money: #70d6a4;
+      --yellow: #f4ca64;
+      --danger: #ff7c72;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% -8%, rgba(255,107,44,.13), transparent 30rem),
+        radial-gradient(circle at 95% 5%, rgba(139,169,255,.1), transparent 26rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button, select { font: inherit; }
+    button, label, select { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(1380px, calc(100% - 30px));
+      margin: 0 auto;
+      padding: 30px 0 max(42px, env(safe-area-inset-bottom));
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Songti SC", STSong, serif;
+      font-size: clamp(34px, 5vw, 58px);
+      font-weight: 600;
+      letter-spacing: -.055em;
+      line-height: .95;
+    }
+
+    .version {
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 5px 9px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .035em;
+    }
+
+    .utility {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .utility button,
+    .utility select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+
+    .utility button:hover,
+    .utility select:hover {
+      border-color: var(--line-light);
+      color: var(--text);
+    }
+
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .resource {
+      position: relative;
+      min-height: 142px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, var(--panel-2), var(--panel));
+      padding: 17px;
+    }
+
+    .resource::after {
+      position: absolute;
+      right: -8px;
+      bottom: -34px;
+      color: rgba(255,255,255,.032);
+      font-family: Georgia, serif;
+      font-size: 108px;
+      line-height: 1;
+      content: attr(data-mark);
+      pointer-events: none;
+    }
+
+    .resource-name {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .11em;
+    }
+
+    .resource-value {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      margin-top: 18px;
+      font-size: clamp(26px, 3vw, 41px);
+      font-weight: 750;
+      letter-spacing: -.045em;
+      line-height: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .resource-rate {
+      position: relative;
+      z-index: 1;
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .resource-split {
+      position: relative;
+      z-index: 1;
+      margin-top: 5px;
+      color: #777066;
+      font-size: 10px;
+    }
+
+    .section {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(25, 23, 20, .93);
+    }
+
+    .lane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 13px;
+    }
+
+    .lane-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lane-title h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 730;
+      letter-spacing: .04em;
+    }
+
+    .lane-mark {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .traffic .lane-title { color: var(--traffic); }
+    .style .lane-title { color: var(--style); }
+
+    .lane-summary {
+      color: var(--muted);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .lane-summary strong {
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .track-wrap {
+      overflow-x: auto;
+      padding: 0 14px 14px;
+      scrollbar-color: var(--line-light) transparent;
+      scrollbar-width: thin;
+    }
+
+    .track {
+      display: grid;
+      min-width: 1100px;
+      grid-template-columns: repeat(7, minmax(145px, 1fr));
+      gap: 8px;
+    }
+
+    .node {
+      position: relative;
+      min-height: 176px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.016);
+      padding: 13px;
+    }
+
+    .node:not(:last-child)::after {
+      position: absolute;
+      z-index: 3;
+      top: 47%;
+      right: -13px;
+      width: 18px;
+      border-top: 1px solid var(--line-light);
+      color: var(--muted);
+      content: "";
+      pointer-events: none;
+    }
+
+    .node:not(:last-child)::before {
+      position: absolute;
+      z-index: 4;
+      top: calc(47% - 3px);
+      right: -13px;
+      border-width: 3px 0 3px 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent var(--line-light);
+      content: "";
+      pointer-events: none;
+    }
+
+    .node-index {
+      color: #6d665d;
+      font-size: 9px;
+      letter-spacing: .13em;
+    }
+
+    .node-name {
+      margin-top: 7px;
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .node-value {
+      overflow: hidden;
+      margin-top: 17px;
+      font-size: clamp(21px, 2vw, 29px);
+      font-weight: 730;
+      letter-spacing: -.035em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .node-rate {
+      min-height: 28px;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .buy-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .buy-row button {
+      min-height: 31px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding: 5px 7px;
+      font-size: 9px;
+      cursor: pointer;
+    }
+
+    .traffic .buy-row button:hover:not(:disabled) {
+      border-color: var(--traffic);
+      background: var(--traffic-soft);
+    }
+
+    .style .buy-row button:hover:not(:disabled) {
+      border-color: var(--style);
+      background: var(--style-soft);
+    }
+
+    .buy-row button:disabled {
+      cursor: not-allowed;
+      opacity: .35;
+    }
+
+    .locked .track { opacity: .35; filter: grayscale(.35); }
+    .locked .track-wrap { position: relative; }
+
+    .lock-message {
+      display: none;
+      position: absolute;
+      z-index: 8;
+      left: 50%;
+      top: 50%;
+      width: min(420px, calc(100% - 40px));
+      border: 1px solid rgba(139,169,255,.35);
+      border-radius: 13px;
+      background: rgba(20,19,18,.94);
+      color: var(--text);
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: center;
+      transform: translate(-50%, -50%);
+    }
+
+    .locked .lock-message { display: block; }
+
+    .boost-bar {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding: 13px 16px 15px;
+    }
+
+    .boost-label strong {
+      display: block;
+      font-size: 11px;
+    }
+
+    .boost-label span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .boost-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .boost {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      padding: 8px 9px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .boost:hover:not(:disabled) { border-color: var(--line-light); }
+    .traffic .boost:hover:not(:disabled) { background: var(--traffic-soft); }
+    .style .boost:hover:not(:disabled) { background: var(--style-soft); }
+    .boost:disabled { cursor: not-allowed; opacity: .34; }
+    .boost-name { font-size: 10px; font-weight: 680; }
+    .boost-level { margin-top: 3px; color: var(--muted); font-size: 8px; }
+    .boost-cost { flex: 0 0 auto; color: var(--yellow); font-size: 9px; }
+
+    .locked .boost-bar { opacity: .38; }
+
+    .aesthetic-hub {
+      display: grid;
+      grid-template-columns: minmax(180px, .7fr) minmax(190px, .8fr) minmax(300px, 1.5fr) minmax(150px, .65fr);
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+      border: 1px solid #4b443b;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(255,107,44,.07), rgba(244,202,100,.035), rgba(139,169,255,.07)),
+        rgba(25,23,20,.96);
+      padding: 16px 18px;
+    }
+
+    .hub-title {
+      font-family: Georgia, "Songti SC", serif;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .hub-copy {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.45;
+    }
+
+    .hub-rate {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 740;
+      letter-spacing: -.04em;
+    }
+
+    .hub-rate-label,
+    .hub-detail {
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .hub-detail { margin-top: 5px; }
+
+    .allocation {
+      min-width: 0;
+    }
+
+    .allocation-labels,
+    .allocation-values {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 9px;
+    }
+
+    .allocation-labels {
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .allocation-values {
+      margin-top: 6px;
+      font-size: 11px;
+      font-weight: 680;
+    }
+
+    .allocation-values span:first-child { color: var(--traffic); }
+    .allocation-values span:last-child { color: var(--style); }
+
+    .allocation input[type="range"] {
+      width: 100%;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--traffic);
+      cursor: pointer;
+    }
+
+    .allocation input[type="range"]:disabled {
+      cursor: not-allowed;
+      opacity: .4;
+    }
+
+    .hub-upgrade .boost {
+      width: 100%;
+      min-height: 54px;
+    }
+
+    .lower-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, .8fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(25, 23, 20, .93);
+      padding: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .panel-note {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 15px;
+    }
+
+    .forecast {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.015);
+      padding: 11px;
+    }
+
+    .forecast-name { color: var(--muted); font-size: 9px; }
+    .forecast-value {
+      margin-top: 7px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .forecast.locked-forecast { opacity: .38; }
+
+    .milestone-title {
+      margin-top: 17px;
+      font-family: Georgia, "Songti SC", serif;
+      font-size: clamp(23px, 3vw, 37px);
+      line-height: 1.1;
+    }
+
+    .progress {
+      height: 7px;
+      margin-top: 18px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #302b25;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--traffic), var(--yellow), var(--style));
+      transition: width .2s ease;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .status {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      width: max-content;
+      max-width: calc(100% - 30px);
+      border: 1px solid var(--line-light);
+      border-radius: 12px;
+      background: rgba(31,28,24,.97);
+      box-shadow: 0 16px 50px rgba(0,0,0,.45);
+      padding: 11px 14px;
+      color: var(--text);
+      font-size: 11px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 14px);
+      transition: opacity .18s, transform .18s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    dialog {
+      width: min(430px, calc(100% - 30px));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 22px;
+    }
+
+    dialog::backdrop { background: rgba(0,0,0,.72); }
+    dialog h3 { margin: 0; font-size: 18px; }
+    dialog p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .dialog-actions button {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 9px 13px;
+      cursor: pointer;
+    }
+
+    .dialog-actions .danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    @media (max-width: 900px) {
+      .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .aesthetic-hub { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .lower-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 660px) {
+      .app { width: min(100% - 18px, 1380px); padding-top: 20px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .utility { justify-content: flex-start; }
+      .resource { min-height: 130px; padding: 14px; }
+      .resource-value { font-size: clamp(24px, 9vw, 36px); }
+      .lane-head { align-items: flex-start; flex-direction: column; }
+      .lane-summary { text-align: left; }
+      .track-wrap { padding-inline: 9px; }
+      .boost-bar { grid-template-columns: 1fr; }
+      .boost-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .aesthetic-hub { grid-template-columns: 1fr; padding: 15px; }
+      .forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .panel { padding: 15px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <div class="brand">
+          <h1>审美复利</h1>
+          <span class="version">DUAL CHAIN · V4</span>
+        </div>
+        <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
+      </div>
+      <div class="utility">
+        <select id="number-format" aria-label="数字显示格式">
+          <option value="auto">自动格式</option>
+          <option value="plain">完整数字</option>
+          <option value="scientific">科学计数</option>
+        </select>
+        <button id="save-button" type="button">保存</button>
+        <button id="reset-button" type="button">清档</button>
+      </div>
+    </header>
+
+    <section class="resource-grid" aria-label="总资源">
+      <article class="resource" data-mark="A">
+        <div class="resource-name">总审美 AESTHETIC</div>
+        <div class="resource-value" id="total-aesthetic">0</div>
+        <div class="resource-rate" id="total-aesthetic-rate">+0 / 秒</div>
+        <div class="resource-split" id="aesthetic-split">热点 0 · 深度 0</div>
+      </article>
+      <article class="resource" data-mark="W">
+        <div class="resource-name">总作品 WORKS</div>
+        <div class="resource-value" id="total-works">0</div>
+        <div class="resource-rate" id="total-works-rate">+0 / 秒</div>
+        <div class="resource-split" id="works-split">快作 0 · 精品 0</div>
+      </article>
+      <article class="resource" data-mark="F">
+        <div class="resource-name">总粉丝 FANS</div>
+        <div class="resource-value" id="total-fans">0</div>
+        <div class="resource-rate" id="total-fans-rate">+0 / 秒</div>
+        <div class="resource-split" id="fans-split">路人 0 · 核心 0</div>
+      </article>
+      <article class="resource" data-mark="¥">
+        <div class="resource-name">可用金钱 MONEY</div>
+        <div class="resource-value" id="total-money">¥100</div>
+        <div class="resource-rate" id="total-money-rate">+¥0 / 秒</div>
+        <div class="resource-split" id="money-split">广告 ¥0 · 订阅 ¥0</div>
+      </article>
+    </section>
+
+    <section class="section traffic" aria-label="流量生产链">
+      <div class="lane-head">
+        <div class="lane-title">
+          <span class="lane-mark"></span>
+          <h2>流量线 · 启动快，规模越大越容易饱和</h2>
+        </div>
+        <div class="lane-summary" id="traffic-summary">
+          平台效率 <strong>100%</strong> · 广告 <strong>+¥0/秒</strong>
+        </div>
+      </div>
+      <div class="track-wrap">
+        <div class="track">
+          <article class="node">
+            <div class="node-index">01 · SOURCE</div>
+            <div class="node-name">趋势雷达</div>
+            <div class="node-value" id="traffic-radar">1</div>
+            <div class="node-rate" id="traffic-radar-rate">生产热点审美</div>
+            <div class="buy-row">
+              <button type="button" data-buy="radar" data-amount="one">扩建 <span id="radar-cost">¥25</span></button>
+              <button type="button" data-buy="radar" data-amount="max">MAX</button>
+            </div>
+          </article>
+          <article class="node">
+            <div class="node-index">02 · TASTE</div>
+            <div class="node-name">热点审美</div>
+            <div class="node-value" id="traffic-aesthetic">10</div>
+            <div class="node-rate" id="traffic-aesthetic-rate">+1 / 秒</div>
+          </article>
+          <article class="node">
+            <div class="node-index">03 · IDEA</div>
+            <div class="node-name">选题库</div>
+            <div class="node-value" id="traffic-topics">0</div>
+            <div class="node-rate" id="traffic-topics-rate">生产快作</div>
+            <div class="buy-row">
+              <button type="button" data-buy="topic" data-amount="one">建立 <span id="topic-cost">10审美</span></button>
+              <button type="button" data-buy="topic" data-amount="max">MAX</button>
+            </div>
+          </article>
+          <article class="node">
+            <div class="node-index">04 · WORK</div>
+            <div class="node-name">快作</div>
+            <div class="node-value" id="traffic-works">0</div>
+            <div class="node-rate" id="traffic-works-rate">生产曝光</div>
+          </article>
+          <article class="node">
+            <div class="node-index">05 · REACH</div>
+            <div class="node-name">曝光</div>
+            <div class="node-value" id="traffic-reach">0</div>
+            <div class="node-rate" id="traffic-reach-rate">生产路人粉</div>
+          </article>
+          <article class="node">
+            <div class="node-index">06 · AUDIENCE</div>
+            <div class="node-name">路人粉</div>
+            <div class="node-value" id="traffic-fans">0</div>
+            <div class="node-rate" id="traffic-fans-rate">生产广告收入</div>
+          </article>
+          <article class="node">
+            <div class="node-index">07 · RETURN</div>
+            <div class="node-name">累计广告收入</div>
+            <div class="node-value" id="traffic-income">¥0</div>
+            <div class="node-rate" id="traffic-income-rate">回流可用金钱</div>
+          </article>
+        </div>
+      </div>
+      <div class="boost-bar">
+        <div class="boost-label">
+          <strong>流量线强化</strong>
+          <span>上游耐投 · 下游即时但更快变贵</span>
+        </div>
+        <div class="boost-grid">
+          <button class="boost" type="button" data-upgrade="radarBoost">
+            <span><span class="boost-name">雷达校准</span><span class="boost-level" id="level-radarBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-radarBoost">¥10</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="quickBoost">
+            <span><span class="boost-name">创作提速</span><span class="boost-level" id="level-quickBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-quickBoost">¥18</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="reachBoost">
+            <span><span class="boost-name">投流优化</span><span class="boost-level" id="level-reachBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-reachBoost">¥32</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="adBoost">
+            <span><span class="boost-name">广告议价</span><span class="boost-level" id="level-adBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-adBoost">¥55</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="aesthetic-hub" aria-label="审美中枢">
+      <div>
+        <div class="hub-title">审美中枢</div>
+        <div class="hub-copy">全部作品和粉丝产生共享审美，再按比例回流两条生产线。</div>
+      </div>
+      <div>
+        <div class="hub-rate-label">共享审美回流</div>
+        <div class="hub-rate" id="shared-aesthetic-rate">+0 / 秒</div>
+        <div class="hub-detail" id="shared-aesthetic-detail">作品 +0 · 粉丝 +0</div>
+      </div>
+      <div class="allocation">
+        <div class="allocation-labels">
+          <span>拖动分配新产生的共享审美</span>
+          <span id="allocation-lock-note">风格线解锁前固定为流量</span>
+        </div>
+        <input id="aesthetic-allocation" type="range" min="0" max="100" step="5" value="100"
+          aria-label="共享审美分配给流量线的比例" disabled>
+        <div class="allocation-values">
+          <span id="traffic-allocation">流量 100%</span>
+          <span id="style-allocation">风格 0%</span>
+        </div>
+      </div>
+      <div class="hub-upgrade">
+        <button class="boost" type="button" data-upgrade="translationBoost">
+          <span>
+            <span class="boost-name">审美转译</span>
+            <span class="boost-level" id="level-translationBoost">等级 0</span>
+          </span>
+          <span class="boost-cost" id="upgrade-cost-translationBoost">¥50</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section style locked" id="style-section" aria-label="风格生产链">
+      <div class="lane-head">
+        <div class="lane-title">
+          <span class="lane-mark"></span>
+          <h2>风格线 · 启动慢，核心粉价值更高</h2>
+        </div>
+        <div class="lane-summary" id="style-summary">
+          累计赚取¥30后解锁
+        </div>
+      </div>
+      <div class="track-wrap">
+        <div class="lock-message" id="style-lock-message">
+          流量线累计赚取¥30后解锁风格线。<br>
+          当前进度：¥0 / ¥30
+        </div>
+        <div class="track">
+          <article class="node">
+            <div class="node-index">01 · SOURCE</div>
+            <div class="node-name">艺术积累</div>
+            <div class="node-value" id="style-art">0</div>
+            <div class="node-rate" id="style-art-rate">生产深度审美</div>
+            <div class="buy-row">
+              <button type="button" data-buy="art" data-amount="one" disabled>扩建 <span id="art-cost">¥200</span></button>
+              <button type="button" data-buy="art" data-amount="max" disabled>MAX</button>
+            </div>
+          </article>
+          <article class="node">
+            <div class="node-index">02 · TASTE</div>
+            <div class="node-name">深度审美</div>
+            <div class="node-value" id="style-aesthetic">0</div>
+            <div class="node-rate" id="style-aesthetic-rate">+0 / 秒</div>
+          </article>
+          <article class="node">
+            <div class="node-index">03 · IDEA</div>
+            <div class="node-name">母题库</div>
+            <div class="node-value" id="style-motifs">0</div>
+            <div class="node-rate" id="style-motifs-rate">生产精品</div>
+            <div class="buy-row">
+              <button type="button" data-buy="motif" data-amount="one" disabled>建立 <span id="motif-cost">20审美</span></button>
+              <button type="button" data-buy="motif" data-amount="max" disabled>MAX</button>
+            </div>
+          </article>
+          <article class="node">
+            <div class="node-index">04 · WORK</div>
+            <div class="node-name">精品</div>
+            <div class="node-value" id="style-works">0</div>
+            <div class="node-rate" id="style-works-rate">生产口碑</div>
+          </article>
+          <article class="node">
+            <div class="node-index">05 · REACH</div>
+            <div class="node-name">口碑</div>
+            <div class="node-value" id="style-reputation">0</div>
+            <div class="node-rate" id="style-reputation-rate">生产核心粉</div>
+          </article>
+          <article class="node">
+            <div class="node-index">06 · AUDIENCE</div>
+            <div class="node-name">核心粉</div>
+            <div class="node-value" id="style-fans">0</div>
+            <div class="node-rate" id="style-fans-rate">生产订阅收入</div>
+          </article>
+          <article class="node">
+            <div class="node-index">07 · RETURN</div>
+            <div class="node-name">累计订阅收入</div>
+            <div class="node-value" id="style-income">¥0</div>
+            <div class="node-rate" id="style-income-rate">回流可用金钱</div>
+          </article>
+        </div>
+      </div>
+      <div class="boost-bar">
+        <div class="boost-label">
+          <strong>风格线强化</strong>
+          <span>解锁后持续投资长期复利</span>
+        </div>
+        <div class="boost-grid">
+          <button class="boost" type="button" data-upgrade="artBoost" disabled>
+            <span><span class="boost-name">艺术研修</span><span class="boost-level" id="level-artBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-artBoost">¥80</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="fineBoost" disabled>
+            <span><span class="boost-name">精品打磨</span><span class="boost-level" id="level-fineBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-fineBoost">¥140</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="reputationBoost" disabled>
+            <span><span class="boost-name">口碑沉淀</span><span class="boost-level" id="level-reputationBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-reputationBoost">¥240</span>
+          </button>
+          <button class="boost" type="button" data-upgrade="subscriptionBoost" disabled>
+            <span><span class="boost-name">订阅价值</span><span class="boost-level" id="level-subscriptionBoost">等级 0</span></span>
+            <span class="boost-cost" id="upgrade-cost-subscriptionBoost">¥400</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>五分钟复利预测</h2>
+            <p class="panel-note">按持续把新增审美投入题库估算，多买1个生产者五分钟后的增收。</p>
+          </div>
+        </div>
+        <div class="forecast-grid">
+          <div class="forecast">
+            <div class="forecast-name">+1 趋势雷达</div>
+            <div class="forecast-value" id="forecast-radar">+¥0</div>
+          </div>
+          <div class="forecast">
+            <div class="forecast-name">+1 选题库</div>
+            <div class="forecast-value" id="forecast-topic">+¥0</div>
+          </div>
+          <div class="forecast locked-forecast" id="forecast-art-card">
+            <div class="forecast-name">+1 艺术积累</div>
+            <div class="forecast-value" id="forecast-art">未解锁</div>
+          </div>
+          <div class="forecast locked-forecast" id="forecast-motif-card">
+            <div class="forecast-name">+1 母题库</div>
+            <div class="forecast-value" id="forecast-motif">未解锁</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>下一个节点</h2>
+        <p class="panel-note">奖励只强化对应生产层，不再全链翻倍。</p>
+        <div class="milestone-title" id="milestone-title">建立第1个选题库</div>
+        <div class="progress" aria-label="里程碑进度">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progress-current">0</span>
+          <span id="progress-target">1</span>
+        </div>
+        <div class="status" id="status">自动保存 · 离线收益按50%效率结算</div>
+      </article>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="reset-dialog">
+    <h3>清除双链版全部进度？</h3>
+    <p>两条生产链、累计收入和离线进度都会永久删除。旧版存档不会受到影响。</p>
+    <div class="dialog-actions">
+      <button id="cancel-reset" type="button">取消</button>
+      <button class="danger" id="confirm-reset" type="button">确认清档</button>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SAVE_KEY = "aesthetic-compound-save-v2";
+      const MAX_VALUE = 1e300;
+      const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
+      const STYLE_UNLOCK_INCOME = 30;
+      const CONFIG = {
+        radar: { baseCost: 25, costRatio: 1.85, resource: "money" },
+        topic: { baseCost: 10, costRatio: 1.55, resource: "trafficAesthetic" },
+        art: { baseCost: 200, costRatio: 1.8, resource: "money" },
+        motif: { baseCost: 20, costRatio: 1.58, resource: "styleAesthetic" }
+      };
+      const UPGRADE_CONFIG = {
+        radarBoost: {
+          name: "雷达校准", baseCost: 10, costRatio: 1.8, effect: 1.18, lane: "traffic"
+        },
+        quickBoost: {
+          name: "创作提速", baseCost: 18, costRatio: 1.85, effect: 1.17, lane: "traffic"
+        },
+        reachBoost: {
+          name: "投流优化", baseCost: 32, costRatio: 1.85, effect: 1.18, lane: "traffic"
+        },
+        adBoost: {
+          name: "广告议价", baseCost: 55, costRatio: 2.2, effect: 1.11, lane: "traffic"
+        },
+        translationBoost: {
+          name: "审美转译", baseCost: 50, costRatio: 1.9, effect: 1.15, lane: "shared"
+        },
+        artBoost: {
+          name: "艺术研修", baseCost: 80, costRatio: 1.75, effect: 1.2, lane: "style"
+        },
+        fineBoost: {
+          name: "精品打磨", baseCost: 140, costRatio: 1.8, effect: 1.18, lane: "style"
+        },
+        reputationBoost: {
+          name: "口碑沉淀", baseCost: 240, costRatio: 1.85, effect: 1.18, lane: "style"
+        },
+        subscriptionBoost: {
+          name: "订阅价值", baseCost: 400, costRatio: 2.3, effect: 1.1, lane: "style"
+        }
+      };
+
+      const defaultState = () => ({
+        version: 4,
+        money: 100,
+        lifetimeIncome: 0,
+        styleUnlocked: false,
+        earlyBoostGranted: true,
+        aestheticAllocation: 100,
+        allocationTouched: false,
+        traffic: {
+          radar: 1,
+          aesthetic: 10,
+          topics: 0,
+          works: 0,
+          reach: 0,
+          fans: 0,
+          income: 0
+        },
+        style: {
+          art: 0,
+          aesthetic: 0,
+          motifs: 0,
+          works: 0,
+          reputation: 0,
+          fans: 0,
+          income: 0
+        },
+        bought: { radar: 0, art: 0 },
+        levels: {
+          radarBoost: 0,
+          quickBoost: 0,
+          reachBoost: 0,
+          adBoost: 0,
+          translationBoost: 0,
+          artBoost: 0,
+          fineBoost: 0,
+          reputationBoost: 0,
+          subscriptionBoost: 0
+        },
+        numberFormat: "auto",
+        lastSave: Date.now()
+      });
+
+      let state = defaultState();
+      let lastFrame = performance.now();
+      let lastRender = 0;
+      let lastForecast = 0;
+      let forecastCache = { radar: 0, topic: 0, art: 0, motif: 0 };
+      let toastTimer = 0;
+
+      const $ = (id) => document.getElementById(id);
+
+      function finite(value) {
+        if (Number.isNaN(value) || value === -Infinity) return 0;
+        if (value === Infinity) return MAX_VALUE;
+        return Math.max(0, Math.min(MAX_VALUE, value));
+      }
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function format(value, options = {}) {
+        const currency = Boolean(options.currency);
+        const signed = Boolean(options.signed);
+        const safe = finite(Number(value) || 0);
+        const prefix = currency ? "¥" : "";
+        const sign = signed && safe > 0 ? "+" : "";
+
+        if (state.numberFormat === "scientific" || safe >= 1e16) {
+          return `${sign}${prefix}${safe.toExponential(3)}`;
+        }
+        if (state.numberFormat === "plain") {
+          return `${sign}${prefix}${safe.toLocaleString("zh-CN", {
+            maximumFractionDigits: safe < 10 ? 2 : safe < 1000 ? 1 : 0
+          })}`;
+        }
+        if (safe >= 1e8) {
+          return `${sign}${prefix}${(safe / 1e8).toLocaleString("zh-CN", {
+            maximumFractionDigits: safe < 1e10 ? 2 : 1
+          })}亿`;
+        }
+        if (safe >= 1e4) {
+          return `${sign}${prefix}${(safe / 1e4).toLocaleString("zh-CN", {
+            maximumFractionDigits: safe < 1e6 ? 2 : 1
+          })}万`;
+        }
+        return `${sign}${prefix}${safe.toLocaleString("zh-CN", {
+          maximumFractionDigits: safe < 10 ? 2 : safe < 1000 ? 1 : 0
+        })}`;
+      }
+
+      function milestoneMultipliers(s) {
+        return {
+          source: s.lifetimeIncome >= 1e6 ? 1.25 : 1,
+          trafficWorks: 1 + (s.traffic.topics >= 5 ? .25 : 0) +
+            (s.traffic.topics >= 10 ? .25 : 0),
+          trafficMoney: s.traffic.fans >= 1000 ? 1.25 : 1,
+          styleWorks: 1 + (s.style.motifs >= 3 ? .25 : 0) +
+            (s.style.motifs >= 8 ? .25 : 0),
+          styleMoney: s.style.fans >= 500 ? 1.25 : 1
+        };
+      }
+
+      function ratesFor(s) {
+        const mult = milestoneMultipliers(s);
+        const boost = (key) => Math.pow(
+          UPGRADE_CONFIG[key]?.effect || 1,
+          s.levels?.[key] || 0
+        );
+        const saturation = 1 / Math.sqrt(1 + s.traffic.fans / 5000);
+        const totalWorks = finite(s.traffic.works + s.style.works);
+        const totalFans = finite(s.traffic.fans + s.style.fans);
+        const workFeedback = finite(Math.sqrt(totalWorks) * .05);
+        const fanFeedback = finite(Math.sqrt(totalFans) * .01);
+        const sharedRate = finite(
+          (workFeedback + fanFeedback) * boost("translationBoost")
+        );
+        const trafficShare = s.styleUnlocked
+          ? Math.max(0, Math.min(1, Number(s.aestheticAllocation ?? 70) / 100))
+          : 1;
+        const styleShare = s.styleUnlocked ? 1 - trafficShare : 0;
+        const trafficDirectAesthetic = finite(
+          s.traffic.radar * 1 * mult.source * boost("radarBoost")
+        );
+        const styleDirectAesthetic = s.styleUnlocked
+          ? finite(s.style.art * .35 * mult.source * boost("artBoost"))
+          : 0;
+        const traffic = {
+          directAesthetic: trafficDirectAesthetic,
+          aesthetic: finite(trafficDirectAesthetic + sharedRate * trafficShare),
+          works: finite(s.traffic.topics * .03 * mult.trafficWorks * boost("quickBoost")),
+          reach: finite(s.traffic.works * .04),
+          fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost")),
+          money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost")),
+          saturation
+        };
+        const style = {
+          directAesthetic: styleDirectAesthetic,
+          aesthetic: finite(styleDirectAesthetic + sharedRate * styleShare),
+          works: s.styleUnlocked
+            ? finite(s.style.motifs * .01 * mult.styleWorks * boost("fineBoost"))
+            : 0,
+          reputation: s.styleUnlocked ? finite(s.style.works * .02) : 0,
+          fans: s.styleUnlocked
+            ? finite(s.style.reputation * .002 * boost("reputationBoost"))
+            : 0,
+          money: s.styleUnlocked
+            ? finite(s.style.fans * .05 * mult.styleMoney * boost("subscriptionBoost"))
+            : 0
+        };
+        return {
+          traffic,
+          style,
+          shared: {
+            rate: sharedRate,
+            workFeedback: finite(workFeedback * boost("translationBoost")),
+            fanFeedback: finite(fanFeedback * boost("translationBoost")),
+            trafficShare,
+            styleShare
+          },
+          totalMoney: finite(traffic.money + style.money)
+        };
+      }
+
+      function unlockStyleIfNeeded(s, notify = false) {
+        if (!s.styleUnlocked && s.lifetimeIncome >= STYLE_UNLOCK_INCOME) {
+          s.styleUnlocked = true;
+          s.style.art = Math.max(1, s.style.art);
+          s.style.aesthetic = Math.max(20, s.style.aesthetic);
+          if (!s.allocationTouched) s.aestheticAllocation = 70;
+          if (notify) showToast("风格线已解锁：获得1点艺术积累和20点深度审美");
+        }
+      }
+
+      function advance(target, seconds, notify = false) {
+        let remaining = Math.max(0, seconds);
+        if (remaining === 0) return;
+        const step = Math.max(.05, remaining / 5000);
+
+        while (remaining > 1e-8) {
+          const dt = Math.min(step, remaining);
+          const r = ratesFor(target);
+
+          target.traffic.aesthetic = finite(target.traffic.aesthetic + r.traffic.aesthetic * dt);
+          target.traffic.works = finite(target.traffic.works + r.traffic.works * dt);
+          target.traffic.reach = finite(target.traffic.reach + r.traffic.reach * dt);
+          target.traffic.fans = finite(target.traffic.fans + r.traffic.fans * dt);
+          target.traffic.income = finite(target.traffic.income + r.traffic.money * dt);
+
+          target.style.aesthetic = finite(target.style.aesthetic + r.style.aesthetic * dt);
+          target.style.works = finite(target.style.works + r.style.works * dt);
+          target.style.reputation = finite(target.style.reputation + r.style.reputation * dt);
+          target.style.fans = finite(target.style.fans + r.style.fans * dt);
+          target.style.income = finite(target.style.income + r.style.money * dt);
+
+          const income = finite(r.totalMoney * dt);
+          target.money = finite(target.money + income);
+          target.lifetimeIncome = finite(target.lifetimeIncome + income);
+          unlockStyleIfNeeded(target, notify);
+          remaining -= dt;
+        }
+      }
+
+      function purchaseCount(type) {
+        if (type === "radar") return state.bought.radar;
+        if (type === "art") return state.bought.art;
+        if (type === "topic") return state.traffic.topics;
+        return state.style.motifs;
+      }
+
+      function purchaseCost(type, count = purchaseCount(type)) {
+        const cfg = CONFIG[type];
+        return finite(cfg.baseCost * Math.pow(cfg.costRatio, count));
+      }
+
+      function availableResource(type, target = state) {
+        const resource = CONFIG[type].resource;
+        if (resource === "money") return target.money;
+        if (resource === "trafficAesthetic") return target.traffic.aesthetic;
+        return target.style.aesthetic;
+      }
+
+      function setAvailableResource(type, amount, target = state) {
+        const value = finite(amount);
+        const resource = CONFIG[type].resource;
+        if (resource === "money") target.money = value;
+        else if (resource === "trafficAesthetic") target.traffic.aesthetic = value;
+        else target.style.aesthetic = value;
+      }
+
+      function maxAffordable(type) {
+        const cfg = CONFIG[type];
+        const available = availableResource(type);
+        const first = purchaseCost(type);
+        if (available + 1e-10 < first) return { count: 0, total: 0 };
+
+        let count = Math.max(1, Math.floor(
+          Math.log(1 + available * (cfg.costRatio - 1) / first) /
+          Math.log(cfg.costRatio)
+        ));
+        count = Math.min(10000, count);
+        let total = first * (Math.pow(cfg.costRatio, count) - 1) / (cfg.costRatio - 1);
+
+        while (count > 1 && total > available * (1 + 1e-10)) {
+          count -= 1;
+          total = first * (Math.pow(cfg.costRatio, count) - 1) / (cfg.costRatio - 1);
+        }
+        return { count, total: finite(total) };
+      }
+
+      function addProducer(type, count, target = state) {
+        if (type === "radar") {
+          target.traffic.radar += count;
+          target.bought.radar += count;
+        } else if (type === "art") {
+          target.style.art += count;
+          target.bought.art += count;
+        } else if (type === "topic") {
+          target.traffic.topics += count;
+        } else {
+          target.style.motifs += count;
+        }
+      }
+
+      function buy(type, amount) {
+        if ((type === "art" || type === "motif") && !state.styleUnlocked) {
+          showToast("风格线尚未解锁");
+          return;
+        }
+
+        const result = amount === "max"
+          ? maxAffordable(type)
+          : { count: availableResource(type) >= purchaseCost(type) ? 1 : 0, total: purchaseCost(type) };
+
+        if (result.count < 1) {
+          const missing = Math.max(0, purchaseCost(type) - availableResource(type));
+          const currency = CONFIG[type].resource === "money";
+          showToast(`还需要 ${format(missing, { currency })}${currency ? "" : " 点审美"}`);
+          return;
+        }
+
+        setAvailableResource(type, availableResource(type) - result.total);
+        addProducer(type, result.count);
+
+        const names = {
+          radar: "趋势雷达",
+          topic: "选题库",
+          art: "艺术积累",
+          motif: "母题库"
+        };
+        showToast(`${names[type]} +${result.count}`);
+        updateForecasts(true);
+        render(true);
+      }
+
+      function upgradeCost(key) {
+        const cfg = UPGRADE_CONFIG[key];
+        return finite(cfg.baseCost * Math.pow(cfg.costRatio, state.levels[key] || 0));
+      }
+
+      function buyUpgrade(key) {
+        const cfg = UPGRADE_CONFIG[key];
+        if (!cfg) return;
+        if (cfg.lane === "style" && !state.styleUnlocked) {
+          showToast("风格线尚未解锁");
+          return;
+        }
+
+        const cost = upgradeCost(key);
+        if (state.money + 1e-10 < cost) {
+          showToast(`还需要 ${format(cost - state.money, { currency: true })}`);
+          return;
+        }
+
+        state.money = finite(state.money - cost);
+        state.levels[key] += 1;
+        showToast(`${cfg.name}升至 ${state.levels[key]} 级`);
+        updateForecasts(true);
+        render(true);
+      }
+
+      function forecast(type) {
+        if ((type === "art" || type === "motif") && !state.styleUnlocked) return 0;
+        const baseline = clone(state);
+        const candidate = clone(state);
+        addProducer(type, 1, candidate);
+
+        for (let i = 0; i < 60; i += 1) {
+          advance(baseline, 5, false);
+          advance(candidate, 5, false);
+          forecastReinvest(baseline);
+          forecastReinvest(candidate);
+        }
+        return finite(candidate.lifetimeIncome - baseline.lifetimeIncome);
+      }
+
+      function forecastReinvest(target) {
+        const reinvest = (type) => {
+          const cfg = CONFIG[type];
+          const isTopic = type === "topic";
+          let count = isTopic ? target.traffic.topics : target.style.motifs;
+          let available = isTopic ? target.traffic.aesthetic : target.style.aesthetic;
+          let guard = 0;
+
+          while (guard < 1000) {
+            const cost = cfg.baseCost * Math.pow(cfg.costRatio, count);
+            if (available + 1e-10 < cost) break;
+            available -= cost;
+            count += 1;
+            guard += 1;
+          }
+
+          if (isTopic) {
+            target.traffic.aesthetic = finite(available);
+            target.traffic.topics = count;
+          } else {
+            target.style.aesthetic = finite(available);
+            target.style.motifs = count;
+          }
+        };
+
+        reinvest("topic");
+        if (target.styleUnlocked) reinvest("motif");
+      }
+
+      function updateForecasts(force = false) {
+        const now = performance.now();
+        if (!force && now - lastForecast < 2000) return;
+        lastForecast = now;
+        forecastCache = {
+          radar: forecast("radar"),
+          topic: forecast("topic"),
+          art: forecast("art"),
+          motif: forecast("motif")
+        };
+      }
+
+      function nextMilestone() {
+        const checks = [
+          {
+            met: state.traffic.topics >= 1,
+            current: state.traffic.topics,
+            target: 1,
+            title: "建立第1个选题库"
+          },
+          {
+            met: state.traffic.topics >= 5,
+            current: state.traffic.topics,
+            target: 5,
+            title: "5个选题库 · 快作效率+25%"
+          },
+          {
+            met: state.styleUnlocked,
+            current: state.lifetimeIncome,
+            target: STYLE_UNLOCK_INCOME,
+            title: "累计赚取¥30 · 解锁风格线"
+          },
+          {
+            met: state.traffic.fans >= 1000,
+            current: state.traffic.fans,
+            target: 1000,
+            title: "1,000路人粉 · 广告效率+25%"
+          },
+          {
+            met: state.style.motifs >= 3,
+            current: state.style.motifs,
+            target: 3,
+            title: "3个母题库 · 精品效率+25%"
+          },
+          {
+            met: state.style.fans >= 500,
+            current: state.style.fans,
+            target: 500,
+            title: "500核心粉 · 订阅效率+25%"
+          },
+          {
+            met: state.traffic.topics >= 10,
+            current: state.traffic.topics,
+            target: 10,
+            title: "10个选题库 · 快作再加25%"
+          },
+          {
+            met: state.style.motifs >= 8,
+            current: state.style.motifs,
+            target: 8,
+            title: "8个母题库 · 精品再加25%"
+          },
+          {
+            met: state.lifetimeIncome >= 1e6,
+            current: state.lifetimeIncome,
+            target: 1e6,
+            title: "累计¥100万 · 两类审美产出+25%"
+          }
+        ];
+        return checks.find((item) => !item.met) || {
+          current: state.lifetimeIncome,
+          target: 1e7,
+          title: "累计¥1,000万 · 当前版本完成"
+        };
+      }
+
+      function render(force = false) {
+        const now = performance.now();
+        if (!force && now - lastRender < 100) return;
+        lastRender = now;
+        updateForecasts(force);
+
+        const r = ratesFor(state);
+        const totalAesthetic = finite(state.traffic.aesthetic + state.style.aesthetic);
+        const totalWorks = finite(state.traffic.works + state.style.works);
+        const totalFans = finite(state.traffic.fans + state.style.fans);
+
+        $("total-aesthetic").textContent = format(totalAesthetic);
+        $("total-works").textContent = format(totalWorks);
+        $("total-fans").textContent = format(totalFans);
+        $("total-money").textContent = format(state.money, { currency: true });
+        $("total-aesthetic-rate").textContent =
+          `${format(r.traffic.aesthetic + r.style.aesthetic, { signed: true })} / 秒`;
+        $("total-works-rate").textContent =
+          `${format(r.traffic.works + r.style.works, { signed: true })} / 秒`;
+        $("total-fans-rate").textContent =
+          `${format(r.traffic.fans + r.style.fans, { signed: true })} / 秒`;
+        $("total-money-rate").textContent =
+          `${format(r.totalMoney, { currency: true, signed: true })} / 秒`;
+        $("aesthetic-split").textContent =
+          `热点 ${format(state.traffic.aesthetic)} · 深度 ${format(state.style.aesthetic)}`;
+        $("works-split").textContent =
+          `快作 ${format(state.traffic.works)} · 精品 ${format(state.style.works)}`;
+        $("fans-split").textContent =
+          `路人 ${format(state.traffic.fans)} · 核心 ${format(state.style.fans)}`;
+        $("money-split").textContent =
+          `广告 ${format(state.traffic.income, { currency: true })} · 订阅 ${format(state.style.income, { currency: true })}`;
+
+        $("traffic-radar").textContent = format(state.traffic.radar);
+        $("traffic-aesthetic").textContent = format(state.traffic.aesthetic);
+        $("traffic-topics").textContent = format(state.traffic.topics);
+        $("traffic-works").textContent = format(state.traffic.works);
+        $("traffic-reach").textContent = format(state.traffic.reach);
+        $("traffic-fans").textContent = format(state.traffic.fans);
+        $("traffic-income").textContent = format(state.traffic.income, { currency: true });
+        $("traffic-radar-rate").textContent =
+          `直接生产 ${format(r.traffic.directAesthetic, { signed: true })}/秒`;
+        $("traffic-aesthetic-rate").textContent =
+          `${format(r.traffic.aesthetic, { signed: true })} / 秒`;
+        $("traffic-topics-rate").textContent =
+          `生产快作 ${format(r.traffic.works, { signed: true })}/秒`;
+        $("traffic-works-rate").textContent =
+          `生产曝光 ${format(r.traffic.reach, { signed: true })}/秒`;
+        $("traffic-reach-rate").textContent =
+          `生产路人粉 ${format(r.traffic.fans, { signed: true })}/秒`;
+        $("traffic-fans-rate").textContent =
+          `生产广告 ${format(r.traffic.money, { currency: true, signed: true })}/秒`;
+        $("traffic-income-rate").textContent =
+          `回流 ${format(r.traffic.money, { currency: true, signed: true })}/秒`;
+        $("traffic-summary").innerHTML =
+          `平台效率 <strong>${(r.traffic.saturation * 100).toFixed(1)}%</strong> · 广告 <strong>${format(r.traffic.money, { currency: true, signed: true })}/秒</strong>`;
+
+        $("style-art").textContent = format(state.style.art);
+        $("style-aesthetic").textContent = format(state.style.aesthetic);
+        $("style-motifs").textContent = format(state.style.motifs);
+        $("style-works").textContent = format(state.style.works);
+        $("style-reputation").textContent = format(state.style.reputation);
+        $("style-fans").textContent = format(state.style.fans);
+        $("style-income").textContent = format(state.style.income, { currency: true });
+        $("style-art-rate").textContent =
+          `直接生产 ${format(r.style.directAesthetic, { signed: true })}/秒`;
+        $("style-aesthetic-rate").textContent =
+          `${format(r.style.aesthetic, { signed: true })} / 秒`;
+        $("style-motifs-rate").textContent =
+          `生产精品 ${format(r.style.works, { signed: true })}/秒`;
+        $("style-works-rate").textContent =
+          `生产口碑 ${format(r.style.reputation, { signed: true })}/秒`;
+        $("style-reputation-rate").textContent =
+          `生产核心粉 ${format(r.style.fans, { signed: true })}/秒`;
+        $("style-fans-rate").textContent =
+          `生产订阅 ${format(r.style.money, { currency: true, signed: true })}/秒`;
+        $("style-income-rate").textContent =
+          `回流 ${format(r.style.money, { currency: true, signed: true })}/秒`;
+
+        $("style-section").classList.toggle("locked", !state.styleUnlocked);
+        if (state.styleUnlocked) {
+          $("style-summary").innerHTML =
+            `无平台衰减 · 订阅 <strong>${format(r.style.money, { currency: true, signed: true })}/秒</strong>`;
+        } else {
+          $("style-summary").textContent = "累计赚取¥30后解锁";
+          $("style-lock-message").innerHTML =
+            `流量线累计赚取¥30后解锁风格线。<br>当前进度：${format(state.lifetimeIncome, { currency: true })} / ¥30`;
+        }
+
+        $("shared-aesthetic-rate").textContent =
+          `${format(r.shared.rate, { signed: true })} / 秒`;
+        $("shared-aesthetic-detail").textContent =
+          `作品 ${format(r.shared.workFeedback, { signed: true })} · 粉丝 ${format(r.shared.fanFeedback, { signed: true })}`;
+        $("aesthetic-allocation").value = String(Math.round(r.shared.trafficShare * 100));
+        $("aesthetic-allocation").disabled = !state.styleUnlocked;
+        $("traffic-allocation").textContent =
+          `流量 ${Math.round(r.shared.trafficShare * 100)}% · ${format(r.shared.rate * r.shared.trafficShare, { signed: true })}/秒`;
+        $("style-allocation").textContent =
+          `风格 ${Math.round(r.shared.styleShare * 100)}% · ${format(r.shared.rate * r.shared.styleShare, { signed: true })}/秒`;
+        $("allocation-lock-note").textContent = state.styleUnlocked
+          ? "可随时调整"
+          : "风格线解锁前固定为流量";
+
+        $("radar-cost").textContent = format(purchaseCost("radar"), { currency: true });
+        $("topic-cost").textContent = `${format(purchaseCost("topic"))}审美`;
+        $("art-cost").textContent = format(purchaseCost("art"), { currency: true });
+        $("motif-cost").textContent = `${format(purchaseCost("motif"))}审美`;
+
+        document.querySelectorAll("[data-buy]").forEach((button) => {
+          const type = button.dataset.buy;
+          const locked = (type === "art" || type === "motif") && !state.styleUnlocked;
+          button.disabled = locked || availableResource(type) < purchaseCost(type);
+        });
+
+        Object.keys(UPGRADE_CONFIG).forEach((key) => {
+          const cfg = UPGRADE_CONFIG[key];
+          const effectPercent = Math.round((cfg.effect - 1) * 100);
+          $(`level-${key}`).textContent =
+            `等级 ${state.levels[key]} · 每级 +${effectPercent}%`;
+          $(`upgrade-cost-${key}`).textContent =
+            format(upgradeCost(key), { currency: true });
+          const button = document.querySelector(`[data-upgrade="${key}"]`);
+          button.title =
+            `产出每级 +${effectPercent}%，升级价格每级 ×${cfg.costRatio}`;
+          button.disabled =
+            (cfg.lane === "style" && !state.styleUnlocked) ||
+            state.money < upgradeCost(key);
+        });
+
+        $("forecast-radar").textContent =
+          `${format(forecastCache.radar, { currency: true, signed: true })}`;
+        $("forecast-topic").textContent =
+          `${format(forecastCache.topic, { currency: true, signed: true })}`;
+        $("forecast-art-card").classList.toggle("locked-forecast", !state.styleUnlocked);
+        $("forecast-motif-card").classList.toggle("locked-forecast", !state.styleUnlocked);
+        $("forecast-art").textContent = state.styleUnlocked
+          ? format(forecastCache.art, { currency: true, signed: true })
+          : "未解锁";
+        $("forecast-motif").textContent = state.styleUnlocked
+          ? format(forecastCache.motif, { currency: true, signed: true })
+          : "未解锁";
+
+        const milestone = nextMilestone();
+        const progress = Math.max(0, Math.min(1, milestone.current / milestone.target));
+        $("milestone-title").textContent = milestone.title;
+        $("progress-bar").style.width = `${progress * 100}%`;
+        $("progress-current").textContent = format(milestone.current);
+        $("progress-target").textContent = format(milestone.target);
+        $("number-format").value = state.numberFormat;
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        $("toast").textContent = message;
+        $("toast").classList.add("show");
+        toastTimer = setTimeout(() => $("toast").classList.remove("show"), 1800);
+      }
+
+      function save(showConfirmation = false) {
+        try {
+          state.lastSave = Date.now();
+          localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+          $("status").textContent =
+            `已保存 · ${new Date().toLocaleTimeString("zh-CN", {
+              hour: "2-digit",
+              minute: "2-digit"
+            })} · 离线收益50%`;
+          if (showConfirmation) showToast("进度已保存");
+        } catch {
+          $("status").textContent = "浏览器无法保存进度";
+        }
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(SAVE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          const fresh = defaultState();
+          const needsEarlyGrant = parsed.earlyBoostGranted !== true;
+          state = {
+            ...fresh,
+            ...parsed,
+            traffic: { ...fresh.traffic, ...(parsed.traffic || {}) },
+            style: { ...fresh.style, ...(parsed.style || {}) },
+            bought: { ...fresh.bought, ...(parsed.bought || {}) },
+            levels: { ...fresh.levels, ...(parsed.levels || {}) }
+          };
+          state.version = 4;
+          state.allocationTouched = Boolean(parsed.allocationTouched);
+          state.aestheticAllocation = parsed.aestheticAllocation == null
+            ? (state.styleUnlocked ? 70 : 100)
+            : Math.max(0, Math.min(100, Number(parsed.aestheticAllocation) || 0));
+          if (needsEarlyGrant) {
+            state.money = finite((Number(state.money) || 0) + 75);
+            state.earlyBoostGranted = true;
+          }
+
+          const numericPaths = [
+            ["money"], ["lifetimeIncome"],
+            ["traffic", "radar"], ["traffic", "aesthetic"], ["traffic", "topics"],
+            ["traffic", "works"], ["traffic", "reach"], ["traffic", "fans"], ["traffic", "income"],
+            ["style", "art"], ["style", "aesthetic"], ["style", "motifs"],
+            ["style", "works"], ["style", "reputation"], ["style", "fans"], ["style", "income"],
+            ["bought", "radar"], ["bought", "art"]
+          ];
+          numericPaths.forEach((path) => {
+            const parent = path.length === 1 ? state : state[path[0]];
+            const key = path[path.length - 1];
+            parent[key] = finite(Number(parent[key]) || 0);
+          });
+          Object.keys(fresh.levels).forEach((key) => {
+            state.levels[key] = Math.max(0, Math.floor(Number(state.levels[key]) || 0));
+          });
+
+          const away = Math.min(
+            MAX_OFFLINE_SECONDS,
+            Math.max(0, (Date.now() - Number(state.lastSave || Date.now())) / 1000)
+          );
+          if (away >= 2) {
+            advance(state, away * .5, false);
+            showToast(`离线复利 ${format(away / 60)} 分钟 · 按50%结算`);
+          }
+          unlockStyleIfNeeded(state, false);
+          state.lastSave = Date.now();
+        } catch {
+          state = defaultState();
+          showToast("存档无法读取，已开始新游戏");
+        }
+      }
+
+      function resetGame() {
+        localStorage.removeItem(SAVE_KEY);
+        state = defaultState();
+        forecastCache = { radar: 0, topic: 0, art: 0, motif: 0 };
+        lastForecast = 0;
+        lastFrame = performance.now();
+        $("reset-dialog").close();
+        updateForecasts(true);
+        save(false);
+        render(true);
+        showToast("双链版已重新开始");
+      }
+
+      function frame(now) {
+        const delta = Math.min(1, Math.max(0, (now - lastFrame) / 1000));
+        lastFrame = now;
+        advance(state, delta, true);
+        render(false);
+        requestAnimationFrame(frame);
+      }
+
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-buy]");
+        if (button) {
+          buy(button.dataset.buy, button.dataset.amount);
+          return;
+        }
+        const upgradeButton = event.target.closest("[data-upgrade]");
+        if (upgradeButton) buyUpgrade(upgradeButton.dataset.upgrade);
+      });
+      $("aesthetic-allocation").addEventListener("input", (event) => {
+        if (!state.styleUnlocked) return;
+        state.aestheticAllocation = Math.max(0, Math.min(100, Number(event.target.value)));
+        state.allocationTouched = true;
+        updateForecasts(true);
+        render(true);
+      });
+      $("aesthetic-allocation").addEventListener("change", () => save(false));
+      $("number-format").addEventListener("change", (event) => {
+        state.numberFormat = event.target.value;
+        updateForecasts(true);
+        render(true);
+        save(false);
+      });
+      $("save-button").addEventListener("click", () => save(true));
+      $("reset-button").addEventListener("click", () => $("reset-dialog").showModal());
+      $("cancel-reset").addEventListener("click", () => $("reset-dialog").close());
+      $("confirm-reset").addEventListener("click", resetGame);
+      $("reset-dialog").addEventListener("click", (event) => {
+        if (event.target === $("reset-dialog")) $("reset-dialog").close();
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          save(false);
+        } else {
+          const away = Math.min(
+            MAX_OFFLINE_SECONDS,
+            Math.max(0, (Date.now() - state.lastSave) / 1000)
+          );
+          advance(state, away * .5, false);
+          state.lastSave = Date.now();
+          lastFrame = performance.now();
+          updateForecasts(true);
+          render(true);
+        }
+      });
+      window.addEventListener("beforeunload", () => save(false));
+      setInterval(() => save(false), 10000);
+
+      load();
+      updateForecasts(true);
+      render(true);
+      requestAnimationFrame(frame);
+
+      window.gameDebug = {
+        getState: () => clone(state),
+        getRates: () => clone(ratesFor(state)),
+        simulate: (seconds) => {
+          advance(state, Math.max(0, Number(seconds) || 0), false);
+          updateForecasts(true);
+          render(true);
+          return clone(state);
+        },
+        buy: (type, amount = "one") => buy(type, amount),
+        upgrade: (key) => buyUpgrade(key),
+        reset: resetGame
+      };
+    })();
+  </script>
+</body>
+</html>
