@@ -600,6 +600,75 @@
       font-size: 10px;
     }
 
+    .rebirth-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(220px, .7fr) auto;
+      align-items: center;
+      gap: 18px;
+      margin-top: 12px;
+      border: 1px solid rgba(244, 202, 100, .38);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 80% 0, rgba(244, 202, 100, .09), transparent 22rem),
+        rgba(25, 23, 20, .95);
+      padding: 18px;
+    }
+
+    .rebirth-copy h2 {
+      margin: 0;
+      font-family: Georgia, "Songti SC", serif;
+      font-size: 22px;
+    }
+
+    .rebirth-copy p {
+      max-width: 640px;
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .rebirth-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+    }
+
+    .rebirth-value {
+      color: var(--yellow);
+      font-family: Georgia, "Songti SC", serif;
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .rebirth-multiplier {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .rebirth-progress {
+      margin-top: 10px;
+    }
+
+    .rebirth-action {
+      min-width: 190px;
+      min-height: 54px;
+      border: 1px solid var(--yellow);
+      border-radius: 12px;
+      background: rgba(244, 202, 100, .08);
+      color: var(--yellow);
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 720;
+    }
+
+    .rebirth-action:disabled {
+      border-color: var(--line);
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
     .toast {
       position: fixed;
       z-index: 30;
@@ -664,6 +733,8 @@
       .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .aesthetic-hub { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .lower-grid { grid-template-columns: 1fr; }
+      .rebirth-panel { grid-template-columns: 1fr 1fr; }
+      .rebirth-copy { grid-column: 1 / -1; }
     }
 
     @media (max-width: 660px) {
@@ -680,6 +751,9 @@
       .aesthetic-hub { grid-template-columns: 1fr; padding: 15px; }
       .forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .panel { padding: 15px; }
+      .rebirth-panel { grid-template-columns: 1fr; padding: 15px; }
+      .rebirth-copy { grid-column: auto; }
+      .rebirth-action { width: 100%; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -696,7 +770,7 @@
       <div>
         <div class="brand">
           <h1>审美复利</h1>
-          <span class="version">DUAL CHAIN · V4</span>
+          <span class="version">REBIRTH · V5</span>
         </div>
         <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
       </div>
@@ -732,7 +806,7 @@
       </article>
       <article class="resource" data-mark="¥">
         <div class="resource-name">可用金钱 MONEY</div>
-        <div class="resource-value" id="total-money">¥100</div>
+        <div class="resource-value" id="total-money">¥5,000</div>
         <div class="resource-rate" id="total-money-rate">+¥0 / 秒</div>
         <div class="resource-split" id="money-split">广告 ¥0 · 订阅 ¥0</div>
       </article>
@@ -955,6 +1029,31 @@
       </div>
     </section>
 
+    <section class="rebirth-panel" aria-label="重生系统">
+      <div class="rebirth-copy">
+        <h2>审美遗产</h2>
+        <p>重生会清空本轮金钱、生产者、资源和升级。每点遗产永久强化生产链的每一环，经过多层传导形成复利。</p>
+      </div>
+      <div>
+        <div class="rebirth-stat">
+          <span class="rebirth-value" id="legacy-count">0</span>
+          <span class="rebirth-multiplier" id="legacy-multiplier">每层产出 ×1.00</span>
+        </div>
+        <div class="rebirth-progress">
+          <div class="progress" aria-label="重生进度">
+            <div class="progress-bar" id="rebirth-progress-bar"></div>
+          </div>
+          <div class="progress-meta">
+            <span id="rebirth-current">¥0</span>
+            <span id="rebirth-target">¥100万</span>
+          </div>
+        </div>
+      </div>
+      <button class="rebirth-action" id="rebirth-button" type="button" disabled>
+        累计¥100万后可重生
+      </button>
+    </section>
+
     <section class="lower-grid">
       <article class="panel">
         <div class="panel-head">
@@ -1010,6 +1109,15 @@
     </div>
   </dialog>
 
+  <dialog id="rebirth-dialog">
+    <h3>带着审美遗产重新开始？</h3>
+    <p id="rebirth-dialog-copy">本轮资源和升级会被清空。</p>
+    <div class="dialog-actions">
+      <button id="cancel-rebirth" type="button">取消</button>
+      <button id="confirm-rebirth" type="button">确认重生</button>
+    </div>
+  </dialog>
+
   <script>
     (() => {
       "use strict";
@@ -1017,7 +1125,7 @@
       const SAVE_KEY = "aesthetic-compound-save-v2";
       const MAX_VALUE = 1e300;
       const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
-      const STYLE_UNLOCK_INCOME = 30;
+      const REBIRTH_BASE_INCOME = 1e6;
       const CONFIG = {
         radar: { baseCost: 25, costRatio: 1.85, resource: "money" },
         topic: { baseCost: 10, costRatio: 1.55, resource: "trafficAesthetic" },
@@ -1055,12 +1163,14 @@
       };
 
       const defaultState = () => ({
-        version: 4,
-        money: 100,
+        version: 5,
+        money: 5000,
         lifetimeIncome: 0,
-        styleUnlocked: false,
+        legacy: 0,
+        rebirths: 0,
+        styleUnlocked: true,
         earlyBoostGranted: true,
-        aestheticAllocation: 100,
+        aestheticAllocation: 70,
         allocationTouched: false,
         traffic: {
           radar: 1,
@@ -1072,8 +1182,8 @@
           income: 0
         },
         style: {
-          art: 0,
-          aesthetic: 0,
+          art: 1,
+          aesthetic: 20,
           motifs: 0,
           works: 0,
           reputation: 0,
@@ -1157,8 +1267,23 @@
         };
       }
 
+      function legacyMultiplier(s) {
+        return finite(Math.pow(1.05, Math.max(0, Number(s.legacy) || 0)));
+      }
+
+      function rebirthGain(s) {
+        const income = Math.max(0, Number(s.lifetimeIncome) || 0);
+        return Math.floor(Math.pow(income / REBIRTH_BASE_INCOME, .4));
+      }
+
+      function nextLegacyTarget(s) {
+        const nextGain = rebirthGain(s) + 1;
+        return finite(REBIRTH_BASE_INCOME * Math.pow(nextGain, 2.5));
+      }
+
       function ratesFor(s) {
         const mult = milestoneMultipliers(s);
+        const legacy = legacyMultiplier(s);
         const boost = (key) => Math.pow(
           UPGRADE_CONFIG[key]?.effect || 1,
           s.levels?.[key] || 0
@@ -1169,39 +1294,39 @@
         const workFeedback = finite(Math.sqrt(totalWorks) * .05);
         const fanFeedback = finite(Math.sqrt(totalFans) * .01);
         const sharedRate = finite(
-          (workFeedback + fanFeedback) * boost("translationBoost")
+          (workFeedback + fanFeedback) * boost("translationBoost") * legacy
         );
         const trafficShare = s.styleUnlocked
           ? Math.max(0, Math.min(1, Number(s.aestheticAllocation ?? 70) / 100))
           : 1;
         const styleShare = s.styleUnlocked ? 1 - trafficShare : 0;
         const trafficDirectAesthetic = finite(
-          s.traffic.radar * 1 * mult.source * boost("radarBoost")
+          s.traffic.radar * 1 * mult.source * boost("radarBoost") * legacy
         );
         const styleDirectAesthetic = s.styleUnlocked
-          ? finite(s.style.art * .35 * mult.source * boost("artBoost"))
+          ? finite(s.style.art * .35 * mult.source * boost("artBoost") * legacy)
           : 0;
         const traffic = {
           directAesthetic: trafficDirectAesthetic,
           aesthetic: finite(trafficDirectAesthetic + sharedRate * trafficShare),
-          works: finite(s.traffic.topics * .03 * mult.trafficWorks * boost("quickBoost")),
-          reach: finite(s.traffic.works * .04),
-          fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost")),
-          money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost")),
+          works: finite(s.traffic.topics * .03 * mult.trafficWorks * boost("quickBoost") * legacy),
+          reach: finite(s.traffic.works * .04 * legacy),
+          fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost") * legacy),
+          money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost") * legacy),
           saturation
         };
         const style = {
           directAesthetic: styleDirectAesthetic,
           aesthetic: finite(styleDirectAesthetic + sharedRate * styleShare),
           works: s.styleUnlocked
-            ? finite(s.style.motifs * .01 * mult.styleWorks * boost("fineBoost"))
+            ? finite(s.style.motifs * .01 * mult.styleWorks * boost("fineBoost") * legacy)
             : 0,
-          reputation: s.styleUnlocked ? finite(s.style.works * .02) : 0,
+          reputation: s.styleUnlocked ? finite(s.style.works * .02 * legacy) : 0,
           fans: s.styleUnlocked
-            ? finite(s.style.reputation * .002 * boost("reputationBoost"))
+            ? finite(s.style.reputation * .002 * boost("reputationBoost") * legacy)
             : 0,
           money: s.styleUnlocked
-            ? finite(s.style.fans * .05 * mult.styleMoney * boost("subscriptionBoost"))
+            ? finite(s.style.fans * .05 * mult.styleMoney * boost("subscriptionBoost") * legacy)
             : 0
         };
         return {
@@ -1214,17 +1339,18 @@
             trafficShare,
             styleShare
           },
+          legacyMultiplier: legacy,
           totalMoney: finite(traffic.money + style.money)
         };
       }
 
       function unlockStyleIfNeeded(s, notify = false) {
-        if (!s.styleUnlocked && s.lifetimeIncome >= STYLE_UNLOCK_INCOME) {
+        if (!s.styleUnlocked) {
           s.styleUnlocked = true;
           s.style.art = Math.max(1, s.style.art);
           s.style.aesthetic = Math.max(20, s.style.aesthetic);
           if (!s.allocationTouched) s.aestheticAllocation = 70;
-          if (notify) showToast("风格线已解锁：获得1点艺术积累和20点深度审美");
+          if (notify) showToast("风格线已开放");
         }
       }
 
@@ -1446,12 +1572,6 @@
             title: "5个选题库 · 快作效率+25%"
           },
           {
-            met: state.styleUnlocked,
-            current: state.lifetimeIncome,
-            target: STYLE_UNLOCK_INCOME,
-            title: "累计赚取¥30 · 解锁风格线"
-          },
-          {
             met: state.traffic.fans >= 1000,
             current: state.traffic.fans,
             target: 1000,
@@ -1490,8 +1610,8 @@
         ];
         return checks.find((item) => !item.met) || {
           current: state.lifetimeIncome,
-          target: 1e7,
-          title: "累计¥1,000万 · 当前版本完成"
+          target: nextLegacyTarget(state),
+          title: `继续积累 · 重生可获得${rebirthGain(state) + 1}点审美遗产`
         };
       }
 
@@ -1526,6 +1646,20 @@
           `路人 ${format(state.traffic.fans)} · 核心 ${format(state.style.fans)}`;
         $("money-split").textContent =
           `广告 ${format(state.traffic.income, { currency: true })} · 订阅 ${format(state.style.income, { currency: true })}`;
+
+        const gain = rebirthGain(state);
+        const legacyTarget = nextLegacyTarget(state);
+        const legacyProgress = Math.max(0, Math.min(1, state.lifetimeIncome / legacyTarget));
+        $("legacy-count").textContent = format(state.legacy);
+        $("legacy-multiplier").textContent =
+          `每层产出 ×${r.legacyMultiplier.toFixed(r.legacyMultiplier < 10 ? 2 : 1)} · 已重生${format(state.rebirths)}次`;
+        $("rebirth-progress-bar").style.width = `${legacyProgress * 100}%`;
+        $("rebirth-current").textContent = format(state.lifetimeIncome, { currency: true });
+        $("rebirth-target").textContent = format(legacyTarget, { currency: true });
+        $("rebirth-button").disabled = gain < 1;
+        $("rebirth-button").textContent = gain >= 1
+          ? `重生 · 获得 +${format(gain)} 遗产`
+          : "累计¥100万后可重生";
 
         $("traffic-radar").textContent = format(state.traffic.radar);
         $("traffic-aesthetic").textContent = format(state.traffic.aesthetic);
@@ -1673,7 +1807,7 @@
           if (!raw) return;
           const parsed = JSON.parse(raw);
           const fresh = defaultState();
-          const needsEarlyGrant = parsed.earlyBoostGranted !== true;
+          const previousVersion = Math.max(0, Number(parsed.version) || 0);
           state = {
             ...fresh,
             ...parsed,
@@ -1682,18 +1816,14 @@
             bought: { ...fresh.bought, ...(parsed.bought || {}) },
             levels: { ...fresh.levels, ...(parsed.levels || {}) }
           };
-          state.version = 4;
+          state.version = 5;
           state.allocationTouched = Boolean(parsed.allocationTouched);
           state.aestheticAllocation = parsed.aestheticAllocation == null
-            ? (state.styleUnlocked ? 70 : 100)
+            ? 70
             : Math.max(0, Math.min(100, Number(parsed.aestheticAllocation) || 0));
-          if (needsEarlyGrant) {
-            state.money = finite((Number(state.money) || 0) + 75);
-            state.earlyBoostGranted = true;
-          }
 
           const numericPaths = [
-            ["money"], ["lifetimeIncome"],
+            ["money"], ["lifetimeIncome"], ["legacy"], ["rebirths"],
             ["traffic", "radar"], ["traffic", "aesthetic"], ["traffic", "topics"],
             ["traffic", "works"], ["traffic", "reach"], ["traffic", "fans"], ["traffic", "income"],
             ["style", "art"], ["style", "aesthetic"], ["style", "motifs"],
@@ -1708,6 +1838,16 @@
           Object.keys(fresh.levels).forEach((key) => {
             state.levels[key] = Math.max(0, Math.floor(Number(state.levels[key]) || 0));
           });
+          state.legacy = Math.floor(state.legacy);
+          state.rebirths = Math.floor(state.rebirths);
+          state.styleUnlocked = true;
+          state.style.art = Math.max(1, state.style.art);
+          state.style.aesthetic = Math.max(20, state.style.aesthetic);
+          if (previousVersion < 5) {
+            state.money = Math.max(5000, state.money);
+            if (!state.allocationTouched) state.aestheticAllocation = 70;
+          }
+          state.earlyBoostGranted = true;
 
           const away = Math.min(
             MAX_OFFLINE_SECONDS,
@@ -1736,6 +1876,42 @@
         save(false);
         render(true);
         showToast("双链版已重新开始");
+      }
+
+      function openRebirthDialog() {
+        const gain = rebirthGain(state);
+        if (gain < 1) {
+          showToast(`还需本轮累计 ${format(REBIRTH_BASE_INCOME - state.lifetimeIncome, { currency: true })}`);
+          return;
+        }
+        $("rebirth-dialog-copy").textContent =
+          `本轮资源、生产者和升级会被清空，获得${format(gain)}点审美遗产。永久遗产将达到${format(state.legacy + gain)}点。`;
+        $("rebirth-dialog").showModal();
+      }
+
+      function rebirthGame() {
+        const gain = rebirthGain(state);
+        if (gain < 1) {
+          $("rebirth-dialog").close();
+          return;
+        }
+        const preserved = {
+          legacy: finite(state.legacy + gain),
+          rebirths: finite(state.rebirths + 1),
+          numberFormat: state.numberFormat
+        };
+        state = defaultState();
+        state.legacy = preserved.legacy;
+        state.rebirths = preserved.rebirths;
+        state.numberFormat = preserved.numberFormat;
+        forecastCache = { radar: 0, topic: 0, art: 0, motif: 0 };
+        lastForecast = 0;
+        lastFrame = performance.now();
+        $("rebirth-dialog").close();
+        updateForecasts(true);
+        save(false);
+        render(true);
+        showToast(`重生完成 · 审美遗产 +${format(gain)}`);
       }
 
       function frame(now) {
@@ -1776,6 +1952,12 @@
       $("reset-dialog").addEventListener("click", (event) => {
         if (event.target === $("reset-dialog")) $("reset-dialog").close();
       });
+      $("rebirth-button").addEventListener("click", openRebirthDialog);
+      $("cancel-rebirth").addEventListener("click", () => $("rebirth-dialog").close());
+      $("confirm-rebirth").addEventListener("click", rebirthGame);
+      $("rebirth-dialog").addEventListener("click", (event) => {
+        if (event.target === $("rebirth-dialog")) $("rebirth-dialog").close();
+      });
 
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
@@ -1811,6 +1993,8 @@
         },
         buy: (type, amount = "one") => buy(type, amount),
         upgrade: (key) => buyUpgrade(key),
+        rebirthGain: () => rebirthGain(state),
+        rebirth: rebirthGame,
         reset: resetGame
       };
     })();
