@@ -319,6 +319,10 @@
       margin-top: 10px;
     }
 
+    .buy-row.has-auto {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
     .buy-row button {
       min-height: 31px;
       border: 1px solid var(--line);
@@ -343,6 +347,11 @@
     .buy-row button:disabled {
       cursor: not-allowed;
       opacity: .35;
+    }
+
+    .buy-row button.auto-on {
+      border-color: var(--money);
+      color: var(--money);
     }
 
     .locked .track { opacity: .35; filter: grayscale(.35); }
@@ -775,7 +784,7 @@
       <div>
         <div class="brand">
           <h1>审美复利</h1>
-          <span class="version">CONSUMABLE · V6</span>
+          <span class="version">ELASTIC FLOW · V7</span>
         </div>
         <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
       </div>
@@ -850,9 +859,10 @@
             <div class="node-name">选题库</div>
             <div class="node-value" id="traffic-topics">0</div>
             <div class="node-rate" id="traffic-topics-rate">每件快作消耗1个选题</div>
-            <div class="buy-row">
+            <div class="buy-row has-auto">
               <button type="button" data-buy="topic" data-amount="one">收集 <span id="topic-cost">10审美</span></button>
               <button type="button" data-buy="topic" data-amount="max">MAX</button>
+              <button class="auto-on" type="button" data-auto="topic">AUTO 开</button>
             </div>
           </article>
           <article class="node">
@@ -896,7 +906,7 @@
             <span class="boost-cost" id="upgrade-cost-topicCollectBoost">¥25</span>
           </button>
           <button class="boost" type="button" data-upgrade="quickBoost">
-            <span><span class="boost-name">快作产能</span><span class="boost-level" id="level-quickBoost">等级 0</span></span>
+            <span><span class="boost-name">快作周转</span><span class="boost-level" id="level-quickBoost">等级 0</span></span>
             <span class="boost-cost" id="upgrade-cost-quickBoost">¥50</span>
           </button>
           <button class="boost" type="button" data-upgrade="exposureBoost">
@@ -988,9 +998,10 @@
             <div class="node-name">灵感库</div>
             <div class="node-value" id="style-motifs">0</div>
             <div class="node-rate" id="style-motifs-rate">每件精品消耗0.2个灵感</div>
-            <div class="buy-row">
+            <div class="buy-row has-auto">
               <button type="button" data-buy="motif" data-amount="one">采集 <span id="motif-cost">20审美</span></button>
               <button type="button" data-buy="motif" data-amount="max">MAX</button>
+              <button class="auto-on" type="button" data-auto="motif">AUTO 开</button>
             </div>
           </article>
           <article class="node">
@@ -1034,7 +1045,7 @@
             <span class="boost-cost" id="upgrade-cost-inspirationCollectBoost">¥140</span>
           </button>
           <button class="boost" type="button" data-upgrade="fineBoost">
-            <span><span class="boost-name">精品产能</span><span class="boost-level" id="level-fineBoost">等级 0</span></span>
+            <span><span class="boost-name">精品周转</span><span class="boost-level" id="level-fineBoost">等级 0</span></span>
             <span class="boost-cost" id="upgrade-cost-fineBoost">¥240</span>
           </button>
           <button class="boost" type="button" data-upgrade="reputationBoost">
@@ -1109,7 +1120,7 @@
       <article class="panel">
         <h2>下一个节点</h2>
         <p class="panel-note">奖励只强化对应生产层，不再全链翻倍。</p>
-        <div class="milestone-title" id="milestone-title">生产第1件快作</div>
+        <div class="milestone-title" id="milestone-title">10件快作 · 选题收集量+25%</div>
         <div class="progress" aria-label="里程碑进度">
           <div class="progress-bar" id="progress-bar"></div>
         </div>
@@ -1166,7 +1177,7 @@
           name: "选题收集", baseCost: 25, costRatio: 1.7, effect: 1.15, lane: "traffic"
         },
         quickBoost: {
-          name: "快作产能", baseCost: 50, costRatio: 1.8, effect: 1.2, lane: "traffic"
+          name: "快作周转", baseCost: 50, costRatio: 1.6, effect: 1.15, lane: "traffic"
         },
         exposureBoost: {
           name: "曝光扩散", baseCost: 90, costRatio: 1.9, effect: 1.16, lane: "traffic"
@@ -1190,7 +1201,7 @@
           name: "灵感采集", baseCost: 140, costRatio: 1.7, effect: 1.15, lane: "style"
         },
         fineBoost: {
-          name: "精品产能", baseCost: 240, costRatio: 1.8, effect: 1.2, lane: "style"
+          name: "精品周转", baseCost: 240, costRatio: 1.6, effect: 1.15, lane: "style"
         },
         reputationBoost: {
           name: "口碑沉淀", baseCost: 400, costRatio: 1.9, effect: 1.16, lane: "style"
@@ -1204,7 +1215,7 @@
       };
 
       const defaultState = () => ({
-        version: 6,
+        version: 7,
         money: 5000,
         lifetimeIncome: 0,
         legacy: 0,
@@ -1232,6 +1243,7 @@
           income: 0
         },
         bought: { radar: 0, art: 0 },
+        automation: { topic: true, motif: true },
         levels: {
           radarBoost: 0,
           topicCollectBoost: 0,
@@ -1301,21 +1313,16 @@
         })}`;
       }
 
-      function formatDuration(seconds) {
-        const safe = finite(seconds);
-        if (safe >= 3600) return `${format(safe / 3600)}小时`;
-        if (safe >= 60) return `${format(safe / 60)}分钟`;
-        return `${format(safe)}秒`;
-      }
-
       function milestoneMultipliers(s) {
         return {
           source: s.lifetimeIncome >= 1e6 ? 1.25 : 1,
-          trafficWorks: 1 + (s.traffic.works >= 25 ? .15 : 0) +
-            (s.traffic.works >= 250 ? .15 : 0),
+          trafficCollect: s.traffic.works >= 10 ? 1.25 : 1,
+          trafficWorks: s.traffic.works >= 50 ? 1.2 : 1,
+          trafficReach: s.traffic.reach >= 100 ? 1.2 : 1,
           trafficMoney: s.traffic.fans >= 1000 ? 1.25 : 1,
-          styleWorks: 1 + (s.style.works >= 10 ? .15 : 0) +
-            (s.style.works >= 100 ? .15 : 0),
+          styleCollect: s.style.works >= 5 ? 1.25 : 1,
+          styleWorks: s.style.works >= 25 ? 1.2 : 1,
+          styleReputation: s.style.reputation >= 50 ? 1.2 : 1,
           styleMoney: s.style.fans >= 500 ? 1.25 : 1
         };
       }
@@ -1363,17 +1370,23 @@
         const styleDirectAesthetic = s.styleUnlocked
           ? finite(s.style.art * .35 * mult.source * boost("artBoost") * research * legacy)
           : 0;
-        const quickCapacity = finite(.12 * mult.trafficWorks * boost("quickBoost") * legacy);
-        const fineCapacity = finite(.035 * mult.styleWorks * boost("fineBoost") * legacy);
+        const quickTurnover = finite(
+          s.traffic.topics * .12 * mult.trafficWorks * boost("quickBoost") * legacy
+        );
+        const fineTurnover = finite(
+          s.style.motifs * .035 * mult.styleWorks * boost("fineBoost") * legacy
+        );
         const traffic = {
           directAesthetic: trafficDirectAesthetic,
           aesthetic: finite(trafficDirectAesthetic + sharedRate * trafficShare),
-          works: s.traffic.topics > 0 ? quickCapacity : 0,
-          workCapacity: quickCapacity,
+          works: quickTurnover,
+          workCapacity: quickTurnover,
           topicConsumption: s.traffic.topics > 0
-            ? finite(quickCapacity * TOPIC_PER_QUICK_WORK)
+            ? finite(quickTurnover * TOPIC_PER_QUICK_WORK)
             : 0,
-          reach: finite(s.traffic.works * .04 * boost("exposureBoost") * legacy),
+          reach: finite(
+            s.traffic.works * .04 * mult.trafficReach * boost("exposureBoost") * legacy
+          ),
           fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost") * legacy),
           money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost") * legacy),
           saturation
@@ -1381,15 +1394,16 @@
         const style = {
           directAesthetic: styleDirectAesthetic,
           aesthetic: finite(styleDirectAesthetic + sharedRate * styleShare),
-          works: s.styleUnlocked && s.style.motifs > 0
-            ? fineCapacity
-            : 0,
-          workCapacity: fineCapacity,
+          works: s.styleUnlocked ? fineTurnover : 0,
+          workCapacity: fineTurnover,
           inspirationConsumption: s.styleUnlocked && s.style.motifs > 0
-            ? finite(fineCapacity * INSPIRATION_PER_FINE_WORK)
+            ? finite(fineTurnover * INSPIRATION_PER_FINE_WORK)
             : 0,
           reputation: s.styleUnlocked
-            ? finite(s.style.works * .02 * boost("reputationBoost") * legacy)
+            ? finite(
+              s.style.works * .02 * mult.styleReputation *
+              boost("reputationBoost") * legacy
+            )
             : 0,
           fans: s.styleUnlocked
             ? finite(s.style.reputation * .002 * boost("coreBoost") * legacy)
@@ -1430,6 +1444,7 @@
 
         while (remaining > 1e-8) {
           const dt = Math.min(step, remaining);
+          autoCollect(target);
           const r = ratesFor(target);
           const quickWorks = Math.min(
             r.traffic.works * dt,
@@ -1480,17 +1495,18 @@
       }
 
       function collectionYield(type, target = state) {
+        const milestone = milestoneMultipliers(target);
         if (type === "topic") {
           return finite(Math.pow(
             UPGRADE_CONFIG.topicCollectBoost.effect,
             target.levels?.topicCollectBoost || 0
-          ));
+          ) * milestone.trafficCollect);
         }
         if (type === "motif") {
           return finite(Math.pow(
             UPGRADE_CONFIG.inspirationCollectBoost.effect,
             target.levels?.inspirationCollectBoost || 0
-          ));
+          ) * milestone.styleCollect);
         }
         return 1;
       }
@@ -1550,6 +1566,30 @@
           target.style.motifs = finite(target.style.motifs + added);
         }
         return added;
+      }
+
+      function autoCollect(target = state) {
+        const collect = (type) => {
+          if (!target.automation?.[type]) return;
+          const cost = CONFIG[type].baseCost;
+          const available = availableResource(type, target);
+          const batches = Math.min(100000, Math.floor(available / cost));
+          if (batches < 1) return;
+          setAvailableResource(type, available - batches * cost, target);
+          addProducer(type, batches, target);
+        };
+
+        collect("topic");
+        if (target.styleUnlocked) collect("motif");
+      }
+
+      function toggleAutomation(type) {
+        if (type !== "topic" && type !== "motif") return;
+        state.automation[type] = !state.automation[type];
+        if (state.automation[type]) autoCollect(state);
+        render(true);
+        save(false);
+        showToast(`${type === "topic" ? "选题" : "灵感"}自动收集已${state.automation[type] ? "开启" : "关闭"}`);
       }
 
       function buy(type, amount) {
@@ -1662,16 +1702,40 @@
       function nextMilestone() {
         const checks = [
           {
-            met: state.traffic.works >= 1,
+            met: state.traffic.works >= 10,
             current: state.traffic.works,
-            target: 1,
-            title: "生产第1件快作"
+            target: 10,
+            title: "10件快作 · 选题收集量+25%"
           },
           {
-            met: state.style.works >= 1,
+            met: state.style.works >= 5,
             current: state.style.works,
-            target: 1,
-            title: "生产第1件精品"
+            target: 5,
+            title: "5件精品 · 灵感采集量+25%"
+          },
+          {
+            met: state.traffic.works >= 50,
+            current: state.traffic.works,
+            target: 50,
+            title: "50件快作 · 快作周转+20%"
+          },
+          {
+            met: state.style.works >= 25,
+            current: state.style.works,
+            target: 25,
+            title: "25件精品 · 精品周转+20%"
+          },
+          {
+            met: state.traffic.reach >= 100,
+            current: state.traffic.reach,
+            target: 100,
+            title: "100曝光 · 曝光扩散+20%"
+          },
+          {
+            met: state.style.reputation >= 50,
+            current: state.style.reputation,
+            target: 50,
+            title: "50口碑 · 口碑沉淀+20%"
           },
           {
             met: state.traffic.fans >= 1000,
@@ -1680,34 +1744,10 @@
             title: "1,000路人粉 · 广告效率+25%"
           },
           {
-            met: state.traffic.works >= 25,
-            current: state.traffic.works,
-            target: 25,
-            title: "25件快作 · 快作产能+15%"
-          },
-          {
             met: state.style.fans >= 500,
             current: state.style.fans,
             target: 500,
             title: "500核心粉 · 订阅效率+25%"
-          },
-          {
-            met: state.style.works >= 10,
-            current: state.style.works,
-            target: 10,
-            title: "10件精品 · 精品产能+15%"
-          },
-          {
-            met: state.traffic.works >= 250,
-            current: state.traffic.works,
-            target: 250,
-            title: "250件快作 · 快作产能再加15%"
-          },
-          {
-            met: state.style.works >= 100,
-            current: state.style.works,
-            target: 100,
-            title: "100件精品 · 精品产能再加15%"
           },
           {
             met: state.lifetimeIncome >= 1e6,
@@ -1716,7 +1756,10 @@
             title: "累计¥100万 · 两类审美产出+25%"
           }
         ];
-        return checks.find((item) => !item.met) || {
+        const pending = checks
+          .filter((item) => !item.met)
+          .sort((a, b) => (b.current / b.target) - (a.current / a.target));
+        return pending[0] || {
           current: state.lifetimeIncome,
           target: nextLegacyTarget(state),
           title: `继续积累 · 重生可获得${rebirthGain(state) + 1}点审美遗产`
@@ -1781,8 +1824,8 @@
         $("traffic-aesthetic-rate").textContent =
           `${format(r.traffic.aesthetic, { signed: true })} / 秒`;
         $("traffic-topics-rate").textContent = state.traffic.topics > 0
-          ? `消耗 ${format(r.traffic.topicConsumption)}/秒 · 可维持 ${formatDuration(state.traffic.topics / Math.max(1e-12, r.traffic.topicConsumption))}`
-          : "库存耗尽 · 快作暂停";
+          ? `弹性周转 ${format(r.traffic.topicConsumption)}/秒 · 库存越多越快`
+          : `${state.automation.topic ? "自动收集中" : "库存耗尽"} · 快作暂停`;
         $("traffic-works-rate").textContent =
           `生产曝光 ${format(r.traffic.reach, { signed: true })}/秒`;
         $("traffic-reach-rate").textContent =
@@ -1806,8 +1849,8 @@
         $("style-aesthetic-rate").textContent =
           `${format(r.style.aesthetic, { signed: true })} / 秒`;
         $("style-motifs-rate").textContent = state.style.motifs > 0
-          ? `消耗 ${format(r.style.inspirationConsumption)}/秒 · 可维持 ${formatDuration(state.style.motifs / Math.max(1e-12, r.style.inspirationConsumption))}`
-          : "库存耗尽 · 精品暂停";
+          ? `弹性周转 ${format(r.style.inspirationConsumption)}/秒 · 库存越多越快`
+          : `${state.automation.motif ? "自动采集中" : "库存耗尽"} · 精品暂停`;
         $("style-works-rate").textContent =
           `生产口碑 ${format(r.style.reputation, { signed: true })}/秒`;
         $("style-reputation-rate").textContent =
@@ -1846,6 +1889,11 @@
           const type = button.dataset.buy;
           const locked = (type === "art" || type === "motif") && !state.styleUnlocked;
           button.disabled = locked || availableResource(type) < purchaseCost(type);
+        });
+        document.querySelectorAll("[data-auto]").forEach((button) => {
+          const enabled = Boolean(state.automation[button.dataset.auto]);
+          button.textContent = `AUTO ${enabled ? "开" : "关"}`;
+          button.classList.toggle("auto-on", enabled);
         });
 
         Object.keys(UPGRADE_CONFIG).forEach((key) => {
@@ -1919,9 +1967,10 @@
             traffic: { ...fresh.traffic, ...(parsed.traffic || {}) },
             style: { ...fresh.style, ...(parsed.style || {}) },
             bought: { ...fresh.bought, ...(parsed.bought || {}) },
+            automation: { ...fresh.automation, ...(parsed.automation || {}) },
             levels: { ...fresh.levels, ...(parsed.levels || {}) }
           };
-          state.version = 6;
+          state.version = 7;
           state.allocationTouched = Boolean(parsed.allocationTouched);
           state.aestheticAllocation = parsed.aestheticAllocation == null
             ? 70
@@ -1945,6 +1994,8 @@
           });
           state.legacy = Math.floor(state.legacy);
           state.rebirths = Math.floor(state.rebirths);
+          state.automation.topic = state.automation.topic !== false;
+          state.automation.motif = state.automation.motif !== false;
           state.styleUnlocked = true;
           state.style.art = Math.max(1, state.style.art);
           state.style.aesthetic = Math.max(20, state.style.aesthetic);
@@ -2024,6 +2075,11 @@
       }
 
       document.addEventListener("click", (event) => {
+        const autoButton = event.target.closest("[data-auto]");
+        if (autoButton) {
+          toggleAutomation(autoButton.dataset.auto);
+          return;
+        }
         const button = event.target.closest("[data-buy]");
         if (button) {
           buy(button.dataset.buy, button.dataset.amount);
