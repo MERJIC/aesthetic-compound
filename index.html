@@ -125,6 +125,114 @@
       margin-bottom: 16px;
     }
 
+    .guide-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px 24px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(224, 177, 92, .38);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 92% 15%, rgba(224, 177, 92, .11), transparent 34%),
+        linear-gradient(145deg, rgba(42, 36, 27, .98), rgba(25, 23, 20, .98));
+      padding: 17px 18px;
+    }
+
+    .guide-eyebrow {
+      color: var(--traffic);
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: .12em;
+    }
+
+    .guide-title {
+      margin-top: 6px;
+      font-size: 17px;
+      font-weight: 750;
+    }
+
+    .guide-copy {
+      max-width: 760px;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .guide-chain {
+      margin-top: 9px;
+      color: #82796e;
+      font-size: 10px;
+      letter-spacing: .035em;
+    }
+
+    .guide-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .guide-actions button {
+      min-height: 38px;
+      border: 1px solid var(--line-light);
+      border-radius: 10px;
+      background: rgba(255,255,255,.025);
+      color: var(--text);
+      padding: 8px 13px;
+      cursor: pointer;
+    }
+
+    .guide-actions button:first-child {
+      border-color: rgba(224, 177, 92, .55);
+      background: rgba(224, 177, 92, .1);
+    }
+
+    .guide-progress {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .guide-progress-track {
+      height: 3px;
+      flex: 1;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .guide-progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--traffic);
+      transition: width .3s ease;
+    }
+
+    .guide-progress-meta {
+      min-width: 44px;
+      color: var(--muted);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .guide-progress[hidden],
+    .guide-actions button[hidden] {
+      display: none !important;
+    }
+
+    .tutorial-target {
+      border-color: rgba(224, 177, 92, .92) !important;
+      box-shadow: 0 0 0 3px rgba(224, 177, 92, .13), 0 0 24px rgba(224, 177, 92, .12);
+      animation: guide-pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes guide-pulse {
+      50% { box-shadow: 0 0 0 5px rgba(224, 177, 92, .07), 0 0 30px rgba(224, 177, 92, .2); }
+    }
+
     .resource {
       position: relative;
       min-height: 142px;
@@ -761,6 +869,9 @@
       .app { width: min(100% - 18px, 1380px); padding-top: 20px; }
       header { align-items: flex-start; flex-direction: column; }
       .utility { justify-content: flex-start; }
+      .guide-card { grid-template-columns: 1fr; }
+      .guide-actions { justify-content: flex-start; }
+      .guide-progress { grid-column: auto; }
       .resource { min-height: 130px; padding: 14px; }
       .resource-value { font-size: clamp(24px, 9vw, 36px); }
       .lane-head { align-items: flex-start; flex-direction: column; }
@@ -790,11 +901,12 @@
       <div>
         <div class="brand">
           <h1>审美复利</h1>
-          <span class="version">CROSS SYNERGY · V9</span>
+          <span class="version">GUIDED FLOW · V10</span>
         </div>
         <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
       </div>
       <div class="utility">
+        <button id="guide-button" type="button">玩法</button>
         <select id="number-format" aria-label="数字显示格式">
           <option value="auto">自动格式</option>
           <option value="plain">完整数字</option>
@@ -834,6 +946,23 @@
           <span class="boost-cost" id="upgrade-cost-interestBoost">¥1,000</span>
         </button>
       </article>
+    </section>
+
+    <section class="guide-card" id="guide-card" aria-live="polite">
+      <div>
+        <div class="guide-eyebrow" id="guide-eyebrow">新手指引 · 步骤 1 / 5</div>
+        <div class="guide-title" id="guide-title">当前只做一件事：收集一批选题</div>
+        <div class="guide-copy" id="guide-copy">热点审美不会直接赚钱。先把它变成选题，选题才会被创作成快作。</div>
+        <div class="guide-chain">审美买原料 → 原料形成作品 → 作品带来传播 → 粉丝产生金钱 → 金钱扩建审美源头</div>
+      </div>
+      <div class="guide-actions">
+        <button id="guide-locate" type="button">定位操作</button>
+        <button id="guide-skip" type="button">跳过指引</button>
+      </div>
+      <div class="guide-progress" id="guide-progress">
+        <div class="guide-progress-track"><div class="guide-progress-bar" id="guide-progress-bar"></div></div>
+        <div class="guide-progress-meta" id="guide-progress-meta">0 / 5</div>
+      </div>
     </section>
 
     <section class="section traffic" aria-label="流量生产链">
@@ -1231,7 +1360,7 @@
       };
 
       const defaultState = () => ({
-        version: 9,
+        version: 10,
         money: 5000,
         lifetimeIncome: 0,
         interestIncome: 0,
@@ -1260,7 +1389,8 @@
           income: 0
         },
         bought: { radar: 0, art: 0 },
-        automation: { topic: true, motif: true },
+        automation: { topic: false, motif: false },
+        tutorial: { active: true, completed: false, step: 0 },
         levels: {
           radarBoost: 0,
           topicCollectBoost: 0,
@@ -1288,8 +1418,43 @@
       let lastForecast = 0;
       let forecastCache = { radar: 0, topic: 0, art: 0, motif: 0 };
       let toastTimer = 0;
+      let guideSignature = "";
+      let currentGuideTargets = [];
 
       const $ = (id) => document.getElementById(id);
+
+      const TUTORIAL_STEPS = [
+        {
+          action: "topic",
+          title: "当前只做一件事：收集一批选题",
+          copy: "热点审美不会直接赚钱。先把它变成选题，选题才会被创作成快作。",
+          selectors: ['[data-buy="topic"][data-amount="one"]']
+        },
+        {
+          action: "motif",
+          title: "再采集一批灵感",
+          copy: "深度审美用来采集灵感。灵感形成精品，后续会沉淀口碑和更高价值的核心粉。",
+          selectors: ['[data-buy="motif"][data-amount="one"]']
+        },
+        {
+          action: "automation",
+          title: "开启两条线的自动收集",
+          copy: "把两个 AUTO 都打开。以后审美足够时，系统会自动补充选题和灵感。",
+          selectors: ['[data-auto="topic"]', '[data-auto="motif"]']
+        },
+        {
+          action: "source",
+          title: "扩建一个审美源头",
+          copy: "金钱最先应投入源头。趋势雷达生产热点审美，艺术积累生产深度审美，任选一个扩建即可。",
+          selectors: ['[data-buy="radar"][data-amount="one"]', '[data-buy="art"][data-amount="one"]']
+        },
+        {
+          action: "allocation",
+          title: "调整一次审美中枢",
+          copy: "拖动比例决定共享审美流向。偏流量会强化风格线导流，偏风格会提高流量线广告溢价。",
+          selectors: ["#aesthetic-allocation"]
+        }
+      ];
 
       function finite(value) {
         if (Number.isNaN(value) || value === -Infinity) return 0;
@@ -1634,6 +1799,7 @@
         if (type !== "topic" && type !== "motif") return;
         state.automation[type] = !state.automation[type];
         if (state.automation[type]) autoCollect(state);
+        if (state.automation.topic && state.automation.motif) advanceTutorial("automation");
         render(true);
         save(false);
         showToast(`${type === "topic" ? "选题" : "灵感"}自动收集已${state.automation[type] ? "开启" : "关闭"}`);
@@ -1658,6 +1824,8 @@
 
         setAvailableResource(type, availableResource(type) - result.total);
         const added = addProducer(type, result.count);
+        if (type === "topic" || type === "motif") advanceTutorial(type);
+        if (type === "radar" || type === "art") advanceTutorial("source");
 
         const names = {
           radar: "趋势雷达",
@@ -1668,6 +1836,145 @@
         showToast(`${names[type]} +${format(added)}`);
         updateForecasts(true);
         render(true);
+      }
+
+      function normalizeTutorialStep() {
+        if (!state.tutorial?.active) return;
+        if (
+          TUTORIAL_STEPS[state.tutorial.step]?.action === "automation" &&
+          state.automation.topic &&
+          state.automation.motif
+        ) {
+          state.tutorial.step += 1;
+        }
+        if (state.tutorial.step >= TUTORIAL_STEPS.length) completeTutorial();
+      }
+
+      function advanceTutorial(action) {
+        if (!state.tutorial?.active) return;
+        const step = TUTORIAL_STEPS[state.tutorial.step];
+        if (!step || step.action !== action) return;
+        state.tutorial.step += 1;
+        normalizeTutorialStep();
+        guideSignature = "";
+        if (state.tutorial.active) {
+          showToast(`指引 ${state.tutorial.step} / ${TUTORIAL_STEPS.length}`);
+        }
+      }
+
+      function completeTutorial() {
+        state.tutorial = {
+          active: false,
+          completed: true,
+          step: TUTORIAL_STEPS.length
+        };
+        guideSignature = "";
+        save(false);
+        showToast("你已经跑通完整复利链");
+      }
+
+      function openTutorial() {
+        state.tutorial = { active: true, completed: false, step: 0 };
+        normalizeTutorialStep();
+        guideSignature = "";
+        render(true);
+        save(false);
+        locateGuideTarget();
+      }
+
+      function skipTutorial() {
+        completeTutorial();
+        render(true);
+      }
+
+      function bottleneckGuide(r) {
+        if (!state.automation.topic || !state.automation.motif) {
+          return {
+            title: "建议：开启两条线的自动收集",
+            copy: "库存耗尽会让作品停产。开启 AUTO 后，审美会自动补充选题和灵感。",
+            selectors: ['[data-auto="topic"]', '[data-auto="motif"]']
+          };
+        }
+        if (state.traffic.topics < Math.max(5, r.traffic.topicConsumption * 5)) {
+          return {
+            title: "当前瓶颈：选题库存偏低",
+            copy: "快作正在消耗选题。优先升级「选题收集」或扩建趋势雷达，让热点审美补得更快。",
+            selectors: ['[data-upgrade="topicCollectBoost"]', '[data-buy="radar"][data-amount="one"]']
+          };
+        }
+        if (state.style.motifs < Math.max(1, r.style.inspirationConsumption * 5)) {
+          return {
+            title: "当前瓶颈：灵感库存偏低",
+            copy: "精品正在消耗灵感。优先升级「灵感采集」或扩建艺术积累。",
+            selectors: ['[data-upgrade="inspirationCollectBoost"]', '[data-buy="art"][data-amount="one"]']
+          };
+        }
+        if (r.totalMoney < 1 && state.money >= 25) {
+          return {
+            title: "当前建议：先扩大审美源头",
+            copy: "收入链尚未形成规模。先购买趋势雷达或艺术积累，比把钱留在账户里更快。",
+            selectors: ['[data-buy="radar"][data-amount="one"]', '[data-buy="art"][data-amount="one"]']
+          };
+        }
+        return {
+          title: "当前建议：检查审美中枢的分配",
+          copy: `目前流量 ${Math.round(r.shared.trafficShare * 100)}%，风格 ${Math.round(r.shared.styleShare * 100)}%。拖动比例，观察两条线的每秒金钱如何变化。`,
+          selectors: ["#aesthetic-allocation"]
+        };
+      }
+
+      function setGuideTargets(selectors) {
+        document.querySelectorAll(".tutorial-target").forEach((element) => {
+          element.classList.remove("tutorial-target");
+        });
+        currentGuideTargets = selectors
+          .map((selector) => document.querySelector(selector))
+          .filter(Boolean);
+        currentGuideTargets.forEach((element) => {
+          const target = element.matches('input[type="range"]')
+            ? element.closest(".aesthetic-hub")
+            : element;
+          target?.classList.add("tutorial-target");
+        });
+      }
+
+      function locateGuideTarget() {
+        const target = currentGuideTargets[0];
+        if (!target) return;
+        const scrollTarget = target.matches('input[type="range"]')
+          ? target.closest(".aesthetic-hub")
+          : target.closest(".node, .boost, .aesthetic-hub") || target;
+        scrollTarget.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      }
+
+      function renderGuide(r) {
+        normalizeTutorialStep();
+        const active = Boolean(state.tutorial?.active);
+        const info = active
+          ? TUTORIAL_STEPS[state.tutorial.step]
+          : bottleneckGuide(r);
+        const signature = JSON.stringify([
+          active,
+          state.tutorial?.step,
+          info.title,
+          info.copy,
+          info.selectors
+        ]);
+        if (signature === guideSignature) return;
+        guideSignature = signature;
+
+        $("guide-eyebrow").textContent = active
+          ? `新手指引 · 步骤 ${state.tutorial.step + 1} / ${TUTORIAL_STEPS.length}`
+          : "动态提示 · 不消耗资源";
+        $("guide-title").textContent = info.title;
+        $("guide-copy").textContent = info.copy;
+        $("guide-skip").hidden = !active;
+        $("guide-progress").hidden = !active;
+        $("guide-progress-bar").style.width =
+          `${(state.tutorial.step / TUTORIAL_STEPS.length) * 100}%`;
+        $("guide-progress-meta").textContent =
+          `${state.tutorial.step} / ${TUTORIAL_STEPS.length}`;
+        setGuideTargets(info.selectors);
       }
 
       function upgradeCost(key) {
@@ -1850,6 +2157,7 @@
           `路人 ${format(state.traffic.fans)} · 核心 ${format(state.style.fans)}`;
         $("money-split").textContent =
           `广告 ${format(state.traffic.income, { currency: true })} · 订阅 ${format(state.style.income, { currency: true })} · 利息 ${format(state.interestIncome, { currency: true })}`;
+        renderGuide(r);
 
         const gain = rebirthGain(state);
         const legacyTarget = nextLegacyTarget(state);
@@ -2024,13 +2332,20 @@
             style: { ...fresh.style, ...(parsed.style || {}) },
             bought: { ...fresh.bought, ...(parsed.bought || {}) },
             automation: { ...fresh.automation, ...(parsed.automation || {}) },
+            tutorial: { ...fresh.tutorial, ...(parsed.tutorial || {}) },
             levels: { ...fresh.levels, ...(parsed.levels || {}) }
           };
-          state.version = 9;
+          state.version = 10;
           state.allocationTouched = Boolean(parsed.allocationTouched);
           state.aestheticAllocation = parsed.aestheticAllocation == null
             ? 70
             : Math.max(0, Math.min(100, Number(parsed.aestheticAllocation) || 0));
+          state.tutorial.active = Boolean(state.tutorial.active);
+          state.tutorial.completed = Boolean(state.tutorial.completed);
+          state.tutorial.step = Math.max(
+            0,
+            Math.min(TUTORIAL_STEPS.length, Math.floor(Number(state.tutorial.step) || 0))
+          );
 
           const numericPaths = [
             ["money"], ["lifetimeIncome"], ["interestIncome"], ["legacy"], ["rebirths"],
@@ -2048,6 +2363,13 @@
           if (previousVersion < 9) {
             state.traffic.works = finite(state.traffic.works / WORK_COMPRESSION);
             state.style.works = finite(state.style.works / WORK_COMPRESSION);
+          }
+          if (previousVersion < 10) {
+            state.tutorial = {
+              active: false,
+              completed: true,
+              step: TUTORIAL_STEPS.length
+            };
           }
           Object.keys(fresh.levels).forEach((key) => {
             state.levels[key] = Math.max(0, Math.floor(Number(state.levels[key]) || 0));
@@ -2110,12 +2432,19 @@
         const preserved = {
           legacy: finite(state.legacy + gain),
           rebirths: finite(state.rebirths + 1),
-          numberFormat: state.numberFormat
+          numberFormat: state.numberFormat,
+          automation: { ...state.automation }
         };
         state = defaultState();
         state.legacy = preserved.legacy;
         state.rebirths = preserved.rebirths;
         state.numberFormat = preserved.numberFormat;
+        state.automation = preserved.automation;
+        state.tutorial = {
+          active: false,
+          completed: true,
+          step: TUTORIAL_STEPS.length
+        };
         forecastCache = { radar: 0, topic: 0, art: 0, motif: 0 };
         lastForecast = 0;
         lastFrame = performance.now();
@@ -2152,6 +2481,7 @@
         if (!state.styleUnlocked) return;
         state.aestheticAllocation = Math.max(0, Math.min(100, Number(event.target.value)));
         state.allocationTouched = true;
+        advanceTutorial("allocation");
         updateForecasts(true);
         render(true);
       });
@@ -2163,6 +2493,9 @@
         save(false);
       });
       $("save-button").addEventListener("click", () => save(true));
+      $("guide-button").addEventListener("click", openTutorial);
+      $("guide-locate").addEventListener("click", locateGuideTarget);
+      $("guide-skip").addEventListener("click", skipTutorial);
       $("reset-button").addEventListener("click", () => $("reset-dialog").showModal());
       $("cancel-reset").addEventListener("click", () => $("reset-dialog").close());
       $("confirm-reset").addEventListener("click", resetGame);
