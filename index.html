@@ -223,6 +223,80 @@
       display: none !important;
     }
 
+    .task-board {
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(25, 23, 20, .93);
+      padding: 16px 18px 17px;
+    }
+
+    .task-board-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .task-board h2 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: .04em;
+    }
+
+    .task-board-note {
+      color: var(--muted);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .task-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.016);
+      padding: 12px;
+    }
+
+    .task-card[hidden] { display: none !important; }
+
+    .task-index {
+      color: #71695f;
+      font-size: 9px;
+      letter-spacing: .12em;
+    }
+
+    .task-title {
+      overflow: hidden;
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .task-reward {
+      margin-top: 4px;
+      color: var(--traffic);
+      font-size: 10px;
+    }
+
+    .task-card .progress {
+      height: 4px;
+      margin-top: 10px;
+    }
+
+    .task-card .progress-meta {
+      margin-top: 5px;
+    }
+
     .tutorial-target {
       border-color: rgba(224, 177, 92, .92) !important;
       box-shadow: 0 0 0 3px rgba(224, 177, 92, .13), 0 0 24px rgba(224, 177, 92, .12);
@@ -636,7 +710,7 @@
 
     .lower-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(360px, .8fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 12px;
       margin-top: 12px;
     }
@@ -872,6 +946,9 @@
       .guide-card { grid-template-columns: 1fr; }
       .guide-actions { justify-content: flex-start; }
       .guide-progress { grid-column: auto; }
+      .task-grid { grid-template-columns: 1fr; }
+      .task-board-head { align-items: flex-start; flex-direction: column; }
+      .task-board-note { text-align: left; }
       .resource { min-height: 130px; padding: 14px; }
       .resource-value { font-size: clamp(24px, 9vw, 36px); }
       .lane-head { align-items: flex-start; flex-direction: column; }
@@ -901,7 +978,7 @@
       <div>
         <div class="brand">
           <h1>审美复利</h1>
-          <span class="version">GUIDED FLOW · V10</span>
+          <span class="version">ACTIVE TASKS · V11</span>
         </div>
         <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
       </div>
@@ -962,6 +1039,36 @@
       <div class="guide-progress" id="guide-progress">
         <div class="guide-progress-track"><div class="guide-progress-bar" id="guide-progress-bar"></div></div>
         <div class="guide-progress-meta" id="guide-progress-meta">0 / 5</div>
+      </div>
+    </section>
+
+    <section class="task-board" aria-label="当前任务">
+      <div class="task-board-head">
+        <h2>当前任务</h2>
+        <div class="task-board-note">自动结算 · 同时推进 · 小奖励持续叠加</div>
+      </div>
+      <div class="task-grid">
+        <article class="task-card" id="task-0-card">
+          <div class="task-index" id="task-0-index">任务 01</div>
+          <div class="task-title" id="task-0-title">产出第一件快作</div>
+          <div class="task-reward" id="task-0-reward">奖励 · 选题收集 +8%</div>
+          <div class="progress"><div class="progress-bar" id="task-0-bar"></div></div>
+          <div class="progress-meta"><span id="task-0-current">0</span><span id="task-0-target">1</span></div>
+        </article>
+        <article class="task-card" id="task-1-card">
+          <div class="task-index" id="task-1-index">任务 02</div>
+          <div class="task-title" id="task-1-title">产出第一件精品</div>
+          <div class="task-reward" id="task-1-reward">奖励 · 灵感采集 +8%</div>
+          <div class="progress"><div class="progress-bar" id="task-1-bar"></div></div>
+          <div class="progress-meta"><span id="task-1-current">0</span><span id="task-1-target">1</span></div>
+        </article>
+        <article class="task-card" id="task-2-card">
+          <div class="task-index" id="task-2-index">任务 03</div>
+          <div class="task-title" id="task-2-title">扩建趋势雷达</div>
+          <div class="task-reward" id="task-2-reward">奖励 · 热点审美 +6%</div>
+          <div class="progress"><div class="progress-bar" id="task-2-bar"></div></div>
+          <div class="progress-meta"><span id="task-2-current">0</span><span id="task-2-target">1</span></div>
+        </article>
       </div>
     </section>
 
@@ -1255,19 +1362,6 @@
             <div class="forecast-value" id="forecast-motif">未解锁</div>
           </div>
         </div>
-      </article>
-
-      <article class="panel">
-        <h2>下一个节点</h2>
-        <p class="panel-note">奖励只强化对应生产层，不再全链翻倍。</p>
-        <div class="milestone-title" id="milestone-title">2件快作 · 选题收集量+25%</div>
-        <div class="progress" aria-label="里程碑进度">
-          <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        <div class="progress-meta">
-          <span id="progress-current">0</span>
-          <span id="progress-target">1</span>
-        </div>
         <div class="status" id="status">自动保存 · 离线收益按50%效率结算</div>
       </article>
     </section>
@@ -1359,8 +1453,38 @@
         }
       };
 
+      const totalUpgradeLevels = (s) => Object.values(s.levels || {})
+        .reduce((sum, level) => sum + Math.max(0, Number(level) || 0), 0);
+
+      const TASKS = [
+        { title: "产出第一件快作", reward: "选题收集 +8%", group: "trafficCollect", factor: 1.08, target: 1, value: (s) => s.traffic.works },
+        { title: "产出第一件精品", reward: "灵感采集 +8%", group: "styleCollect", factor: 1.08, target: 1, value: (s) => s.style.works },
+        { title: "扩建 1 个趋势雷达", reward: "热点审美 +6%", group: "trafficSource", factor: 1.06, target: 1, value: (s) => s.bought.radar },
+        { title: "扩建 1 个艺术积累", reward: "深度审美 +6%", group: "styleSource", factor: 1.06, target: 1, value: (s) => s.bought.art },
+        { title: "累计购买 3 级升级", reward: "共享审美 +5%", group: "shared", factor: 1.05, target: 3, value: totalUpgradeLevels },
+        { title: "累计产出 5 件快作", reward: "快作周转 +8%", group: "trafficWorks", factor: 1.08, target: 5, value: (s) => s.traffic.works },
+        { title: "累计产出 3 件精品", reward: "精品周转 +8%", group: "styleWorks", factor: 1.08, target: 3, value: (s) => s.style.works },
+        { title: "累计获得 50 曝光", reward: "曝光扩散 +8%", group: "trafficReach", factor: 1.08, target: 50, value: (s) => s.traffic.reach },
+        { title: "累计获得 25 口碑", reward: "口碑沉淀 +8%", group: "styleReputation", factor: 1.08, target: 25, value: (s) => s.style.reputation },
+        { title: "积累 250 路人粉", reward: "广告收入 +10%", group: "trafficMoney", factor: 1.1, target: 250, value: (s) => s.traffic.fans },
+        { title: "积累 100 核心粉", reward: "订阅收入 +10%", group: "styleMoney", factor: 1.1, target: 100, value: (s) => s.style.fans },
+        { title: "累计扩建 3 个趋势雷达", reward: "热点审美 +6%", group: "trafficSource", factor: 1.06, target: 3, value: (s) => s.bought.radar },
+        { title: "累计扩建 3 个艺术积累", reward: "深度审美 +6%", group: "styleSource", factor: 1.06, target: 3, value: (s) => s.bought.art },
+        { title: "累计购买 10 级升级", reward: "共享审美 +5%", group: "shared", factor: 1.05, target: 10, value: totalUpgradeLevels },
+        { title: "累计产出 25 件快作", reward: "快作周转 +8%", group: "trafficWorks", factor: 1.08, target: 25, value: (s) => s.traffic.works },
+        { title: "累计产出 15 件精品", reward: "精品周转 +8%", group: "styleWorks", factor: 1.08, target: 15, value: (s) => s.style.works },
+        { title: "累计获得 500 曝光", reward: "曝光扩散 +8%", group: "trafficReach", factor: 1.08, target: 500, value: (s) => s.traffic.reach },
+        { title: "累计获得 250 口碑", reward: "口碑沉淀 +8%", group: "styleReputation", factor: 1.08, target: 250, value: (s) => s.style.reputation },
+        { title: "积累 2,500 路人粉", reward: "广告收入 +10%", group: "trafficMoney", factor: 1.1, target: 2500, value: (s) => s.traffic.fans },
+        { title: "积累 1,000 核心粉", reward: "订阅收入 +10%", group: "styleMoney", factor: 1.1, target: 1000, value: (s) => s.style.fans },
+        { title: "累计获得 ¥100 利息", reward: "利息收入 +8%", group: "interestMoney", factor: 1.08, target: 100, currency: true, value: (s) => s.interestIncome },
+        { title: "本轮累计收入 ¥5万", reward: "两类审美源头 +6%", group: "bothSources", factor: 1.06, target: 5e4, currency: true, value: (s) => s.lifetimeIncome },
+        { title: "累计获得 ¥5,000 利息", reward: "利息收入 +8%", group: "interestMoney", factor: 1.08, target: 5000, currency: true, value: (s) => s.interestIncome },
+        { title: "本轮累计收入 ¥100万", reward: "两类审美源头 +6%", group: "bothSources", factor: 1.06, target: 1e6, currency: true, value: (s) => s.lifetimeIncome }
+      ];
+
       const defaultState = () => ({
-        version: 10,
+        version: 11,
         money: 5000,
         lifetimeIncome: 0,
         interestIncome: 0,
@@ -1496,19 +1620,31 @@
         })}`;
       }
 
-      function milestoneMultipliers(s) {
-        return {
-          source: s.lifetimeIncome >= 1e6 ? 1.25 : 1,
-          trafficCollect: s.traffic.works >= 2 ? 1.25 : 1,
-          trafficWorks: s.traffic.works >= 10 ? 1.2 : 1,
-          trafficReach: s.traffic.reach >= 100 ? 1.2 : 1,
-          trafficMoney: s.traffic.fans >= 1000 ? 1.25 : 1,
-          interestMoney: s.interestIncome >= 1000 ? 1.2 : 1,
-          styleCollect: s.style.works >= 1 ? 1.25 : 1,
-          styleWorks: s.style.works >= 5 ? 1.2 : 1,
-          styleReputation: s.style.reputation >= 50 ? 1.2 : 1,
-          styleMoney: s.style.fans >= 500 ? 1.25 : 1
+      function taskMultipliers(s) {
+        const result = {
+          trafficSource: 1,
+          styleSource: 1,
+          trafficCollect: 1,
+          styleCollect: 1,
+          trafficWorks: 1,
+          styleWorks: 1,
+          trafficReach: 1,
+          styleReputation: 1,
+          trafficMoney: 1,
+          styleMoney: 1,
+          interestMoney: 1,
+          shared: 1
         };
+        TASKS.forEach((task) => {
+          if (task.value(s) + 1e-10 < task.target) return;
+          if (task.group === "bothSources") {
+            result.trafficSource *= task.factor;
+            result.styleSource *= task.factor;
+          } else if (result[task.group] != null) {
+            result[task.group] *= task.factor;
+          }
+        });
+        return result;
       }
 
       function legacyMultiplier(s) {
@@ -1534,7 +1670,7 @@
       }
 
       function ratesFor(s) {
-        const mult = milestoneMultipliers(s);
+        const mult = taskMultipliers(s);
         const legacy = legacyMultiplier(s);
         const research = finite(
           1 + .03 * Math.max(0, s.levels?.researchBoost || 0)
@@ -1549,7 +1685,7 @@
         const workFeedback = finite(Math.sqrt(totalWorks * WORK_COMPRESSION) * .05);
         const fanFeedback = finite(Math.sqrt(totalFans) * .01);
         const sharedRate = finite(
-          (workFeedback + fanFeedback) * boost("translationBoost") * legacy
+          (workFeedback + fanFeedback) * boost("translationBoost") * legacy * mult.shared
         );
         const trafficShare = s.styleUnlocked
           ? Math.max(0, Math.min(1, Number(s.aestheticAllocation ?? 70) / 100))
@@ -1558,10 +1694,10 @@
         const trafficDiscovery = finite(1 + 1.2 * Math.sqrt(trafficShare));
         const stylePremium = finite(1 + 1.2 * Math.sqrt(styleShare));
         const trafficDirectAesthetic = finite(
-          s.traffic.radar * 1 * mult.source * boost("radarBoost") * research * legacy
+          s.traffic.radar * 1 * mult.trafficSource * boost("radarBoost") * research * legacy
         );
         const styleDirectAesthetic = s.styleUnlocked
-          ? finite(s.style.art * .35 * mult.source * boost("artBoost") * research * legacy)
+          ? finite(s.style.art * .35 * mult.styleSource * boost("artBoost") * research * legacy)
           : 0;
         const quickProcessing = finite(
           s.traffic.topics * .12 * mult.trafficWorks * boost("quickBoost")
@@ -1707,7 +1843,7 @@
       }
 
       function collectionYield(type, target = state) {
-        const milestone = milestoneMultipliers(target);
+        const milestone = taskMultipliers(target);
         if (type === "topic") {
           return finite(Math.pow(
             UPGRADE_CONFIG.topicCollectBoost.effect,
@@ -2053,77 +2189,42 @@
         };
       }
 
-      function nextMilestone() {
-        const checks = [
-          {
-            met: state.traffic.works >= 2,
-            current: state.traffic.works,
-            target: 2,
-            title: "2件快作 · 选题收集量+25%"
-          },
-          {
-            met: state.style.works >= 1,
-            current: state.style.works,
-            target: 1,
-            title: "1件精品 · 灵感采集量+25%"
-          },
-          {
-            met: state.traffic.works >= 10,
-            current: state.traffic.works,
-            target: 10,
-            title: "10件快作 · 快作周转+20%"
-          },
-          {
-            met: state.style.works >= 5,
-            current: state.style.works,
-            target: 5,
-            title: "5件精品 · 精品周转+20%"
-          },
-          {
-            met: state.traffic.reach >= 100,
-            current: state.traffic.reach,
-            target: 100,
-            title: "100曝光 · 曝光扩散+20%"
-          },
-          {
-            met: state.style.reputation >= 50,
-            current: state.style.reputation,
-            target: 50,
-            title: "50口碑 · 口碑沉淀+20%"
-          },
-          {
-            met: state.traffic.fans >= 1000,
-            current: state.traffic.fans,
-            target: 1000,
-            title: "1,000路人粉 · 广告效率+25%"
-          },
-          {
-            met: state.style.fans >= 500,
-            current: state.style.fans,
-            target: 500,
-            title: "500核心粉 · 订阅效率+25%"
-          },
-          {
-            met: state.interestIncome >= 1000,
-            current: state.interestIncome,
-            target: 1000,
-            title: "累计¥1,000利息 · 利率+20%"
-          },
-          {
-            met: state.lifetimeIncome >= 1e6,
-            current: state.lifetimeIncome,
-            target: 1e6,
-            title: "累计¥100万 · 两类审美产出+25%"
-          }
-        ];
-        const pending = checks
-          .filter((item) => !item.met)
-          .sort((a, b) => (b.current / b.target) - (a.current / a.target));
-        return pending[0] || {
+      function activeTasks() {
+        const pending = TASKS
+          .map((task, index) => ({
+            ...task,
+            index,
+            current: finite(task.value(state))
+          }))
+          .filter((task) => task.current + 1e-10 < task.target)
+          .slice(0, 3);
+        if (pending.length) return pending;
+        return [{
+          index: TASKS.length,
+          title: `积累下一点审美遗产`,
+          reward: `重生时获得第 ${rebirthGain(state) + 1} 点遗产`,
           current: state.lifetimeIncome,
           target: nextLegacyTarget(state),
-          title: `继续积累 · 重生可获得${rebirthGain(state) + 1}点审美遗产`
-        };
+          currency: true
+        }];
+      }
+
+      function renderTasks() {
+        const tasks = activeTasks();
+        for (let index = 0; index < 3; index += 1) {
+          const task = tasks[index];
+          const card = $(`task-${index}-card`);
+          card.hidden = !task;
+          if (!task) continue;
+          const progress = Math.max(0, Math.min(1, task.current / task.target));
+          $(`task-${index}-index`).textContent =
+            task.index < TASKS.length ? `任务 ${String(task.index + 1).padStart(2, "0")}` : "长期任务";
+          $(`task-${index}-title`).textContent = task.title;
+          $(`task-${index}-reward`).textContent = `奖励 · ${task.reward}`;
+          $(`task-${index}-bar`).style.width = `${progress * 100}%`;
+          $(`task-${index}-current`).textContent = format(task.current, { currency: task.currency });
+          $(`task-${index}-target`).textContent = format(task.target, { currency: task.currency });
+        }
       }
 
       function render(force = false) {
@@ -2158,6 +2259,7 @@
         $("money-split").textContent =
           `广告 ${format(state.traffic.income, { currency: true })} · 订阅 ${format(state.style.income, { currency: true })} · 利息 ${format(state.interestIncome, { currency: true })}`;
         renderGuide(r);
+        renderTasks();
 
         const gain = rebirthGain(state);
         const legacyTarget = nextLegacyTarget(state);
@@ -2287,12 +2389,6 @@
           ? format(forecastCache.motif, { currency: true, signed: true })
           : "未解锁";
 
-        const milestone = nextMilestone();
-        const progress = Math.max(0, Math.min(1, milestone.current / milestone.target));
-        $("milestone-title").textContent = milestone.title;
-        $("progress-bar").style.width = `${progress * 100}%`;
-        $("progress-current").textContent = format(milestone.current);
-        $("progress-target").textContent = format(milestone.target);
         $("number-format").value = state.numberFormat;
       }
 
@@ -2335,7 +2431,7 @@
             tutorial: { ...fresh.tutorial, ...(parsed.tutorial || {}) },
             levels: { ...fresh.levels, ...(parsed.levels || {}) }
           };
-          state.version = 10;
+          state.version = 11;
           state.allocationTouched = Boolean(parsed.allocationTouched);
           state.aestheticAllocation = parsed.aestheticAllocation == null
             ? 70
