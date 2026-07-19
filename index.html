@@ -784,7 +784,7 @@
       <div>
         <div class="brand">
           <h1>审美复利</h1>
-          <span class="version">ELASTIC FLOW · V7</span>
+          <span class="version">SMOOTH LEGACY · V8</span>
         </div>
         <p class="subtitle">用流量启动，用风格复利。每一层都在替下一层工作。</p>
       </div>
@@ -1067,12 +1067,12 @@
     <section class="rebirth-panel" aria-label="重生系统">
       <div class="rebirth-copy">
         <h2>审美遗产</h2>
-        <p>重生会清空本轮金钱、生产者、资源和升级。每点遗产永久强化生产链的每一环，经过多层传导形成复利。</p>
+        <p>重生会清空本轮金钱、生产者、资源和升级。遗产以平方根曲线永久强化审美源头与共享回流，再由生产链自然形成复利。</p>
       </div>
       <div>
         <div class="rebirth-stat">
           <span class="rebirth-value" id="legacy-count">0</span>
-          <span class="rebirth-multiplier" id="legacy-multiplier">每层产出 ×1.00</span>
+          <span class="rebirth-multiplier" id="legacy-multiplier">审美源头 ×1.00</span>
         </div>
         <div class="rebirth-progress">
           <div class="progress" aria-label="重生进度">
@@ -1189,7 +1189,7 @@
           name: "广告议价", baseCost: 280, costRatio: 2.2, effect: 1.11, lane: "traffic"
         },
         researchBoost: {
-          name: "长期审美研究", baseCost: 500, costRatio: 1.06, effect: 1.03, lane: "shared"
+          name: "长期审美研究", baseCost: 500, costRatio: 1.04, effect: 1.03, lane: "shared"
         },
         translationBoost: {
           name: "审美转译", baseCost: 120, costRatio: 1.9, effect: 1.15, lane: "shared"
@@ -1215,7 +1215,7 @@
       };
 
       const defaultState = () => ({
-        version: 7,
+        version: 8,
         money: 5000,
         lifetimeIncome: 0,
         legacy: 0,
@@ -1328,25 +1328,32 @@
       }
 
       function legacyMultiplier(s) {
-        return finite(Math.pow(1.05, Math.max(0, Number(s.legacy) || 0)));
+        return finite(1 + .18 * Math.sqrt(Math.max(0, Number(s.legacy) || 0)));
       }
 
       function rebirthGain(s) {
         const income = Math.max(0, Number(s.lifetimeIncome) || 0);
-        return Math.floor(Math.pow(income / REBIRTH_BASE_INCOME, .4));
+        const legacy = Math.max(0, Number(s.legacy) || 0);
+        const resistance = Math.sqrt(1 + legacy / 25);
+        return Math.floor(
+          Math.log2(1 + income / REBIRTH_BASE_INCOME) / resistance
+        );
       }
 
       function nextLegacyTarget(s) {
         const nextGain = rebirthGain(s) + 1;
-        return finite(REBIRTH_BASE_INCOME * Math.pow(nextGain, 2.5));
+        const legacy = Math.max(0, Number(s.legacy) || 0);
+        const resistance = Math.sqrt(1 + legacy / 25);
+        return finite(
+          REBIRTH_BASE_INCOME * (Math.pow(2, nextGain * resistance) - 1)
+        );
       }
 
       function ratesFor(s) {
         const mult = milestoneMultipliers(s);
         const legacy = legacyMultiplier(s);
-        const research = Math.pow(
-          UPGRADE_CONFIG.researchBoost.effect,
-          s.levels?.researchBoost || 0
+        const research = finite(
+          1 + .03 * Math.max(0, s.levels?.researchBoost || 0)
         );
         const boost = (key) => Math.pow(
           UPGRADE_CONFIG[key]?.effect || 1,
@@ -1371,10 +1378,10 @@
           ? finite(s.style.art * .35 * mult.source * boost("artBoost") * research * legacy)
           : 0;
         const quickTurnover = finite(
-          s.traffic.topics * .12 * mult.trafficWorks * boost("quickBoost") * legacy
+          s.traffic.topics * .12 * mult.trafficWorks * boost("quickBoost")
         );
         const fineTurnover = finite(
-          s.style.motifs * .035 * mult.styleWorks * boost("fineBoost") * legacy
+          s.style.motifs * .035 * mult.styleWorks * boost("fineBoost")
         );
         const traffic = {
           directAesthetic: trafficDirectAesthetic,
@@ -1385,10 +1392,10 @@
             ? finite(quickTurnover * TOPIC_PER_QUICK_WORK)
             : 0,
           reach: finite(
-            s.traffic.works * .04 * mult.trafficReach * boost("exposureBoost") * legacy
+            s.traffic.works * .04 * mult.trafficReach * boost("exposureBoost")
           ),
-          fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost") * legacy),
-          money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost") * legacy),
+          fans: finite(s.traffic.reach * .008 * saturation * boost("reachBoost")),
+          money: finite(s.traffic.fans * .004 * mult.trafficMoney * boost("adBoost")),
           saturation
         };
         const style = {
@@ -1402,14 +1409,14 @@
           reputation: s.styleUnlocked
             ? finite(
               s.style.works * .02 * mult.styleReputation *
-              boost("reputationBoost") * legacy
+              boost("reputationBoost")
             )
             : 0,
           fans: s.styleUnlocked
-            ? finite(s.style.reputation * .002 * boost("coreBoost") * legacy)
+            ? finite(s.style.reputation * .002 * boost("coreBoost"))
             : 0,
           money: s.styleUnlocked
-            ? finite(s.style.fans * .05 * mult.styleMoney * boost("subscriptionBoost") * legacy)
+            ? finite(s.style.fans * .05 * mult.styleMoney * boost("subscriptionBoost"))
             : 0
         };
         return {
@@ -1803,14 +1810,14 @@
         const legacyProgress = Math.max(0, Math.min(1, state.lifetimeIncome / legacyTarget));
         $("legacy-count").textContent = format(state.legacy);
         $("legacy-multiplier").textContent =
-          `每层产出 ×${r.legacyMultiplier.toFixed(r.legacyMultiplier < 10 ? 2 : 1)} · 已重生${format(state.rebirths)}次`;
+          `审美源头 ×${r.legacyMultiplier.toFixed(r.legacyMultiplier < 10 ? 2 : 1)} · 已重生${format(state.rebirths)}次`;
         $("rebirth-progress-bar").style.width = `${legacyProgress * 100}%`;
         $("rebirth-current").textContent = format(state.lifetimeIncome, { currency: true });
         $("rebirth-target").textContent = format(legacyTarget, { currency: true });
         $("rebirth-button").disabled = gain < 1;
         $("rebirth-button").textContent = gain >= 1
           ? `重生 · 获得 +${format(gain)} 遗产`
-          : "累计¥100万后可重生";
+          : `累计${format(legacyTarget, { currency: true })}后可重生`;
 
         $("traffic-radar").textContent = format(state.traffic.radar);
         $("traffic-aesthetic").textContent = format(state.traffic.aesthetic);
@@ -1970,7 +1977,7 @@
             automation: { ...fresh.automation, ...(parsed.automation || {}) },
             levels: { ...fresh.levels, ...(parsed.levels || {}) }
           };
-          state.version = 7;
+          state.version = 8;
           state.allocationTouched = Boolean(parsed.allocationTouched);
           state.aestheticAllocation = parsed.aestheticAllocation == null
             ? 70
@@ -2033,7 +2040,7 @@
       function openRebirthDialog() {
         const gain = rebirthGain(state);
         if (gain < 1) {
-          showToast(`还需本轮累计 ${format(REBIRTH_BASE_INCOME - state.lifetimeIncome, { currency: true })}`);
+          showToast(`还需本轮累计 ${format(nextLegacyTarget(state) - state.lifetimeIncome, { currency: true })}`);
           return;
         }
         $("rebirth-dialog-copy").textContent =
