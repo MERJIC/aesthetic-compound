@@ -223,6 +223,10 @@
       display: none !important;
     }
 
+    .guide-card[hidden] {
+      display: none !important;
+    }
+
     .task-board {
       margin-bottom: 16px;
       border: 1px solid var(--line);
@@ -2083,9 +2087,25 @@
         scrollTarget.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
       }
 
+      function completedTaskCount(target = state) {
+        return TASKS.reduce(
+          (count, task) => count + (task.value(target) + 1e-10 >= task.target ? 1 : 0),
+          0
+        );
+      }
+
       function renderGuide(r) {
         normalizeTutorialStep();
         const active = Boolean(state.tutorial?.active);
+        const guideFinished = !active && completedTaskCount(state) >= 8;
+        $("guide-card").hidden = guideFinished;
+        if (guideFinished) {
+          if (guideSignature !== "hidden") {
+            guideSignature = "hidden";
+            setGuideTargets([]);
+          }
+          return;
+        }
         const info = active
           ? TUTORIAL_STEPS[state.tutorial.step]
           : bottleneckGuide(r);
