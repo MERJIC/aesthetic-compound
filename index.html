@@ -2027,42 +2027,6 @@
         render(true);
       }
 
-      function bottleneckGuide(r) {
-        if (!state.automation.topic || !state.automation.motif) {
-          return {
-            title: "建议：开启两条线的自动收集",
-            copy: "库存耗尽会让作品停产。开启 AUTO 后，审美会自动补充选题和灵感。",
-            selectors: ['[data-auto="topic"]', '[data-auto="motif"]']
-          };
-        }
-        if (state.traffic.topics < Math.max(5, r.traffic.topicConsumption * 5)) {
-          return {
-            title: "当前瓶颈：选题库存偏低",
-            copy: "快作正在消耗选题。优先升级「选题收集」或扩建趋势雷达，让热点审美补得更快。",
-            selectors: ['[data-upgrade="topicCollectBoost"]', '[data-buy="radar"][data-amount="one"]']
-          };
-        }
-        if (state.style.motifs < Math.max(1, r.style.inspirationConsumption * 5)) {
-          return {
-            title: "当前瓶颈：灵感库存偏低",
-            copy: "精品正在消耗灵感。优先升级「灵感采集」或扩建艺术积累。",
-            selectors: ['[data-upgrade="inspirationCollectBoost"]', '[data-buy="art"][data-amount="one"]']
-          };
-        }
-        if (r.totalMoney < 1 && state.money >= 25) {
-          return {
-            title: "当前建议：先扩大审美源头",
-            copy: "收入链尚未形成规模。先购买趋势雷达或艺术积累，比把钱留在账户里更快。",
-            selectors: ['[data-buy="radar"][data-amount="one"]', '[data-buy="art"][data-amount="one"]']
-          };
-        }
-        return {
-          title: "当前建议：检查审美中枢的分配",
-          copy: `目前流量 ${Math.round(r.shared.trafficShare * 100)}%，风格 ${Math.round(r.shared.styleShare * 100)}%。拖动比例，观察两条线的每秒金钱如何变化。`,
-          selectors: ["#aesthetic-allocation"]
-        };
-      }
-
       function setGuideTargets(selectors) {
         document.querySelectorAll(".tutorial-target").forEach((element) => {
           element.classList.remove("tutorial-target");
@@ -2087,30 +2051,19 @@
         scrollTarget.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
       }
 
-      function completedTaskCount(target = state) {
-        return TASKS.reduce(
-          (count, task) => count + (task.value(target) + 1e-10 >= task.target ? 1 : 0),
-          0
-        );
-      }
-
-      function renderGuide(r) {
+      function renderGuide() {
         normalizeTutorialStep();
         const active = Boolean(state.tutorial?.active);
-        const guideFinished = !active && completedTaskCount(state) >= 8;
-        $("guide-card").hidden = guideFinished;
-        if (guideFinished) {
+        $("guide-card").hidden = !active;
+        if (!active) {
           if (guideSignature !== "hidden") {
             guideSignature = "hidden";
             setGuideTargets([]);
           }
           return;
         }
-        const info = active
-          ? TUTORIAL_STEPS[state.tutorial.step]
-          : bottleneckGuide(r);
+        const info = TUTORIAL_STEPS[state.tutorial.step];
         const signature = JSON.stringify([
-          active,
           state.tutorial?.step,
           info.title,
           info.copy,
@@ -2119,13 +2072,12 @@
         if (signature === guideSignature) return;
         guideSignature = signature;
 
-        $("guide-eyebrow").textContent = active
-          ? `新手指引 · 步骤 ${state.tutorial.step + 1} / ${TUTORIAL_STEPS.length}`
-          : "动态提示 · 不消耗资源";
+        $("guide-eyebrow").textContent =
+          `新手指引 · 步骤 ${state.tutorial.step + 1} / ${TUTORIAL_STEPS.length}`;
         $("guide-title").textContent = info.title;
         $("guide-copy").textContent = info.copy;
-        $("guide-skip").hidden = !active;
-        $("guide-progress").hidden = !active;
+        $("guide-skip").hidden = false;
+        $("guide-progress").hidden = false;
         $("guide-progress-bar").style.width =
           `${(state.tutorial.step / TUTORIAL_STEPS.length) * 100}%`;
         $("guide-progress-meta").textContent =
@@ -2278,7 +2230,7 @@
           `路人 ${format(state.traffic.fans)} · 核心 ${format(state.style.fans)}`;
         $("money-split").textContent =
           `广告 ${format(state.traffic.income, { currency: true })} · 订阅 ${format(state.style.income, { currency: true })} · 利息 ${format(state.interestIncome, { currency: true })}`;
-        renderGuide(r);
+        renderGuide();
         renderTasks();
 
         const gain = rebirthGain(state);
